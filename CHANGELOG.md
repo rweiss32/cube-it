@@ -6,6 +6,11 @@ Format: `[version] YYYY-MM-DD — description`
 
 ---
 
+## [0.6.0] 2026-03-25 — Real logo image
+
+- Replaced CSS tile divs with logo_heb.png (1417×363 RGBA)
+- Displayed at 64px height in the header, width auto-scales
+
 ## [0.5.0] 2026-03-25 — Purchase CTA
 
 - Start screen: subtle banner linking to cube-it.co.il with a short product pitch

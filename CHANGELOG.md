@@ -6,6 +6,14 @@ Format: `[version] YYYY-MM-DD — description`
 
 ---
 
+## [0.9.0] 2026-03-25 — Sound effects
+
+- Click sound on tile selection and next-round button
+- Confirmation sound on word submission
+- Happy jingle on game start
+- Fanfare on win, descending tone on lose
+- All synthesized via Web Audio API (no external files)
+
 ## [0.8.0] 2026-03-25 — Light mode + dark mode support
 
 - White background by default

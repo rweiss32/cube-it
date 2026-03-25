@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>קוביאות</title>
   <!-- VERSION: 0.6.0 -->
+  <script src="categories.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -373,13 +374,12 @@ const LETTER_POOL = [
   ...Array(3).fill('ת'), ...Array(7).fill('★'),
 ];
 
-// Categories loaded from external categories.json
+// Categories loaded from external categories.js
 let CATEGORIES = {};
 let CARD_KEYS = [];
 
-async function loadCategories() {
-  const res = await fetch('categories.json');
-  const arr = await res.json();
+function loadCategories() {
+  const arr = window.CATEGORIES_DATA || [];
   CATEGORIES = {};
   arr.forEach(c => {
     CATEGORIES[c.category] = {
@@ -789,16 +789,7 @@ function showScreen(id) {
 }
 
 // ── INIT ──────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  const startBtn = document.querySelector('#screen-start button');
-  if (startBtn) startBtn.disabled = true;
-  loadCategories()
-    .then(() => { if (startBtn) startBtn.disabled = false; })
-    .catch(err => {
-      console.error('Failed to load categories.json', err);
-      if (startBtn) startBtn.disabled = false; // allow play with empty categories as fallback
-    });
-});
+loadCategories();
 </script>
 </body>
 </html>

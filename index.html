@@ -373,57 +373,22 @@ const LETTER_POOL = [
   ...Array(3).fill('ת'), ...Array(7).fill('★'),
 ];
 
-// Words are stored WITHOUT final forms (ם→מ, ן→נ, ף→פ, ך→כ, ץ→צ)
-const CATEGORIES = {
-  'חי': {
-    hint: 'בעל חיים',
-    words: ['חתול','כלב','פיל','דב','שור','נמר','כבש','נחש','ארנב','צבי','קוף',
-            'חמור','גמל','פרה','זאב','חזיר','סוס','כריש','תרנגול','דולפינ',
-            'תנינ','ברווז','יונה','עכבר','שפנ','ציפור','נשר','דג','ארי','נמלה']
-  },
-  'דומם': {
-    hint: 'חפץ לא חי',
-    words: ['שעונ','ברז','כסא','ספר','דלת','חלונ','מנורה','כוס','צלחת','מזלג',
-            'שולחנ','תנור','מחשב','טלפונ','מצלמה','מראה','שטיח','כרית','מיטה',
-            'ארונ','שידה','ספה','מדפ','מקרר','מיכל','תיק','ארנק','מחבת','סכינ']
-  },
-  'אוכל': {
-    hint: 'משהו לאכול',
-    words: ['לחמ','גבינה','ביצה','תפוח','בננה','עגבניה','מלפפונ','גזר','בצל',
-            'שומ','פלפל','חסה','שוקולד','עוגה','סלט','מרק','פיצה','תות',
-            'אבטיח','ענב','תאנה','רימונ','חמניה','שקדימ','אגוז','לימונ','תפוז']
-  },
-  'בגדים': {
-    hint: 'פריטי לבוש',
-    words: ['חולצה','שמלה','כובע','נעל','גרב','מעיל','צעיפ','כפפה','חגורה',
-            'סנדל','מגפ','כותונת','גלימה','סינור','שביצ','פיג\'מה']
-  },
-  'טבע': {
-    hint: 'דברים בטבע',
-    words: ['עצ','פרח','ירח','שמש','כוכב','עננ','גשמ','נהר','ים','הר','יער',
-            'שדה','אבנ','חול','צוק','גל','שלג','קשת','מדבר','ביצה','אגמ',
-            'עמק','גיא','ריפ','קרח','חמה','רוח','ערפל']
-  },
-  'מקצועות': {
-    hint: 'עבודה של אנשים',
-    words: ['רופא','מורה','שוטר','טבח','נגר','חייט','מהנדס','אדריכל','מנהל',
-            'שחקנ','זמר','צייר','כותב','ספר','עורכדינ','חשמלאי','שרברב',
-            'גנניה','בנאי','נהג','טייס','רשת','ספנ']
-  },
-  'כלי נגינה': {
-    hint: 'מכשיר מוסיקה',
-    words: ['כינור','גיטרה','תופ','חליל','פסנתר','חצוצרה','עוגב','שופר',
-            'מנדולינה','בנג\'ו','אקורדיונ','טרומבונ','חרוזינ']
-  },
-  'ספורט': {
-    hint: 'קשור לפעילות גופנית',
-    words: ['כדור','מחבט','רשת','גביע','מדליה','שחיה','ריצה','אופניימ',
-            'כדורגל','טניס','גלישה','קפיצה','חץ','קשת','סיפ','גלגלמ',
-            'אתלטיקה','סייפ','שחיינ','מתאגרפ']
-  },
-};
+// Categories loaded from external categories.json
+let CATEGORIES = {};
+let CARD_KEYS = [];
 
-const CARD_KEYS = Object.keys(CATEGORIES);
+async function loadCategories() {
+  const res = await fetch('categories.json');
+  const arr = await res.json();
+  CATEGORIES = {};
+  arr.forEach(c => {
+    CATEGORIES[c.category] = {
+      hint:  c.description || '',
+      words: c.words || [],
+    };
+  });
+  CARD_KEYS = arr.map(c => c.category);
+}
 const MAX_ROUNDS = 5;
 
 // ══════════════════════════════════════════════
@@ -481,7 +446,7 @@ function canSpell(word, tiles) {
 }
 
 function cpuBestWord(tiles, catKey) {
-  const words = shuffle(CATEGORIES[catKey].words); // shuffle for variety on ties
+  const words = shuffle(CATEGORIES[catKey]?.words || []);
   return words
     .filter(w => canSpell(w, tiles))
     .sort((a, b) => b.length - a.length)[0] || '';
@@ -822,6 +787,18 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+
+// ── INIT ──────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const startBtn = document.querySelector('#screen-start button');
+  if (startBtn) startBtn.disabled = true;
+  loadCategories()
+    .then(() => { if (startBtn) startBtn.disabled = false; })
+    .catch(err => {
+      console.error('Failed to load categories.json', err);
+      if (startBtn) startBtn.disabled = false; // allow play with empty categories as fallback
+    });
+});
 </script>
 </body>
 </html>

@@ -6,6 +6,12 @@ Format: `[version] YYYY-MM-DD — description`
 
 ---
 
+## [0.10.0] 2026-03-25 — Correct final Hebrew letter forms
+
+- Submitted word automatically gets final letter form (מ→ם, נ→ן, פ→ף, כ→ך, צ→ץ)
+- Wiktionary lookup now uses the correctly spelled word
+- Final forms shown in result screen and error messages
+
 ## [0.9.0] 2026-03-25 — Sound effects
 
 - Click sound on tile selection and next-round button

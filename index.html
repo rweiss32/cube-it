@@ -488,9 +488,16 @@ function initState() {
 //  UTILITIES
 // ══════════════════════════════════════════════
 
-const FINAL_MAP = { 'ם':'מ','ן':'נ','ף':'פ','ך':'כ','ץ':'צ' };
+const FINAL_MAP    = { 'ם':'מ','ן':'נ','ף':'פ','ך':'כ','ץ':'צ' };
+const SUFFIX_MAP   = { 'מ':'ם','נ':'ן','פ':'ף','כ':'ך','צ':'ץ' };
 function norm(str) {
   return [...(str || '')].map(c => FINAL_MAP[c] ?? c).join('').trim();
+}
+// Apply correct final-letter form to the last character of a word for display/lookup
+function finalForm(word) {
+  if (!word) return word;
+  const last = word[word.length - 1];
+  return SUFFIX_MAP[last] ? word.slice(0, -1) + SUFFIX_MAP[last] : word;
 }
 
 function shuffle(arr) {
@@ -753,7 +760,7 @@ async function submitWord() {
   // Resolve jokers first (if any)
   const hasJokers = rawTiles.includes('★');
   const resolvedTiles = hasJokers ? await resolveJokers(rawTiles) : rawTiles;
-  const word = resolvedTiles.join('');
+  const word = finalForm(resolvedTiles.join(''));
 
   // Lock UI and validate
   setSubmitLocked(true);
@@ -766,7 +773,7 @@ async function submitWord() {
   setSubmitLocked(false);
 
   if (result === false) {
-    document.getElementById('g-error').textContent = `"${norm(word)}" לא נמצאה במילון. נסה מילה אחרת!`;
+    document.getElementById('g-error').textContent = `"${word}" לא נמצאה במילון. נסה מילה אחרת!`;
     return;
   }
   if (result === null) {
@@ -797,8 +804,8 @@ function endRound(playerWord) {
 
   document.getElementById('r-banner').textContent  = bannerText;
   document.getElementById('r-banner').className    = bannerClass;
-  document.getElementById('r-player-word').textContent = pw || '—';
-  document.getElementById('r-cpu-word').textContent    = cw || '—';
+  document.getElementById('r-player-word').textContent = finalForm(pw) || '—';
+  document.getElementById('r-cpu-word').textContent    = finalForm(cw) || '—';
   document.getElementById('r-player-count').textContent = pw ? `${pLen} אותיות` : '';
   document.getElementById('r-cpu-count').textContent    = cw ? `${cLen} אותיות` : '';
   document.getElementById('r-player-score').textContent = state.playerScore;

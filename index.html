@@ -400,7 +400,7 @@
     <div>🤖 <span class="score-num" id="r-cpu-score">0</span></div>
   </div>
 
-  <button class="btn btn-gold" id="r-next-btn" onclick="nextRound()">סיבוב הבא ▶</button>
+  <button class="btn btn-gold" id="r-next-btn" onclick="soundClick();nextRound()">סיבוב הבא ▶</button>
 </div>
 
 <!-- ══════════════ GAME OVER ══════════════ -->
@@ -529,6 +529,7 @@ function cpuBestWord(tiles, catKey) {
 
 function startGame() {
   initState();
+  soundStart();
   showScreen('screen-start'); // briefly — then startRound replaces
   nextRound();
 }
@@ -630,6 +631,7 @@ function renderWordPreview() {
 }
 
 function selectTile(i) {
+  soundClick();
   state.selectedIndices.push(i);
   document.getElementById('g-error').textContent = '';
   renderTiles();
@@ -771,6 +773,7 @@ async function submitWord() {
     document.getElementById('g-error').textContent = '⚠️ לא ניתן לאמת — המילה התקבלה';
   }
 
+  soundSubmit();
   clearInterval(state.timerHandle);
   endRound(word);
 }
@@ -840,9 +843,9 @@ function renderResultTiles(containerId, tiles, word, tileClass) {
 function showGameOver() {
   const p = state.playerScore, c = state.cpuScore;
   let title;
-  if (p > c)      title = '🏆 ניצחת!';
-  else if (c > p) title = '🤖 המחשב ניצח';
-  else            title = '🤝 תיקו!';
+  if (p > c)      { title = '🏆 ניצחת!';        soundWin(); }
+  else if (c > p) { title = '🤖 המחשב ניצח';   soundLose(); }
+  else            { title = '🤝 תיקו!';          soundStart(); }
 
   document.getElementById('go-title').textContent = title;
   document.getElementById('go-score').innerHTML =
@@ -857,6 +860,62 @@ function showGameOver() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+//  SOUNDS  (Web Audio API — no external files)
+// ══════════════════════════════════════════════
+
+let _audioCtx = null;
+function audioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+
+function _tone(freq, start, dur, type = 'sine', vol = 0.28, endFreq = null) {
+  const ctx = audioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, start);
+  if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, start + dur);
+  gain.gain.setValueAtTime(vol, start);
+  gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+  osc.start(start);
+  osc.stop(start + dur + 0.01);
+}
+
+function soundClick() {
+  const t = audioCtx().currentTime;
+  _tone(900, t, 0.06, 'sine', 0.08, 600);
+}
+
+function soundSubmit() {
+  const t = audioCtx().currentTime;
+  // quick two-note confirmation: G5 → C6
+  _tone(784, t,        0.12, 'sine', 0.25);
+  _tone(1047, t + 0.1, 0.18, 'sine', 0.28);
+}
+
+function soundStart() {
+  const t = audioCtx().currentTime;
+  // cheerful ascending arpeggio: C5 E5 G5 C6
+  [523, 659, 784, 1047].forEach((f, i) => _tone(f, t + i * 0.1, 0.18, 'sine', 0.28));
+}
+
+function soundWin() {
+  const t = audioCtx().currentTime;
+  // rising fanfare + final high note
+  [523, 659, 784, 1047, 1319].forEach((f, i) => _tone(f, t + i * 0.11, 0.22, 'sine', 0.32));
+  _tone(1047, t + 0.6, 0.4, 'sine', 0.25);
+}
+
+function soundLose() {
+  const t = audioCtx().currentTime;
+  // descending "wah-wah"
+  [440, 370, 311, 261].forEach((f, i) => _tone(f, t + i * 0.15, 0.28, 'sawtooth', 0.18));
 }
 
 // ── INIT ──────────────────────────────────────

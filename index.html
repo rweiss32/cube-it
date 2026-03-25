@@ -664,11 +664,12 @@ function clearWord() {
 const wordCache = new Map(); // cache: normalizedWord → true/false/null(network error)
 
 async function isHebrewWord(word) {
-  const key = norm(word);
+  const key = norm(word);               // cache key without final forms
+  const lookup = finalForm(key);        // Wiktionary lookup with correct final form
   if (wordCache.has(key)) return wordCache.get(key);
 
   try {
-    const url = `https://he.wiktionary.org/w/api.php?action=query&titles=${encodeURIComponent(key)}&format=json&origin=*`;
+    const url = `https://he.wiktionary.org/w/api.php?action=query&titles=${encodeURIComponent(lookup)}&format=json&origin=*`;
     const res = await fetch(url);
     const data = await res.json();
     const pages = data.query.pages;

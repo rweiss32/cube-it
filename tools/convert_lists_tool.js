@@ -3,8 +3,8 @@
  * convert_lists_tool.js — convert between words.txt and categories.js
  *
  * Usage:
- *   node tools/convert_lists_tool.js txt2js   — words.txt  → categories.js
- *   node tools/convert_lists_tool.js js2txt   — categories.js → words.txt
+ *   node tools/convert_lists_tool.js txt2js   — data/words.txt  → data/categories.js
+ *   node tools/convert_lists_tool.js js2txt   — data/categories.js → data/words.txt
  *
  * words.txt format:
  *   # Category name | hint text (hint is optional)
@@ -25,8 +25,8 @@ const fs   = require('fs');
 const path = require('path');
 
 const ROOT         = path.join(__dirname, '..');
-const WORDS_TXT    = path.join(ROOT, 'words.txt');
-const CATEGORIES_JS = path.join(ROOT, 'categories.js');
+const WORDS_TXT    = path.join(ROOT, 'data', 'words.txt');
+const CATEGORIES_JS = path.join(ROOT, 'data', 'categories.js');
 
 const HEBREW_RE  = /^[\u05D0-\u05EA]+$/;  // alef–tav only (includes final forms)
 const FINAL_MAP  = { '\u05DD':'\u05DE','\u05DF':'\u05E0','\u05E3':'\u05E4','\u05DA':'\u05DB','\u05E5':'\u05E6' };

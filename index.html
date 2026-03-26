@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>קוביאות</title>
-  <!-- VERSION: 0.17.1 -->
+  <!-- VERSION: 0.17.2 -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#2a2a50" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <script src="categories.js"></script>
+  <script src="data/categories.js"></script>
   <style>
     /* ── THEME TOKENS ── */
     :root {
@@ -315,7 +315,7 @@
 <!-- ══════════════ HEADER ══════════════ -->
 <header id="site-header">
   <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-    <img id="header-logo-img" src="logo.png" alt="קוביאות" />
+    <img id="header-logo-img" src="assets/logo.png" alt="קוביאות" />
     <div class="header-subtitle">משחק מילים עברי</div>
   </div>
   <div class="header-version" id="header-version"></div>
@@ -441,7 +441,7 @@
 </div>
 
 <script>
-const VERSION = '0.17.1';
+const VERSION = '0.17.2';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 function syncBodyPadding() {

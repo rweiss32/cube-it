@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.17.2] 2026-03-26 — Reorganize project files
+
+- Moved logo files to assets/
+- Moved words.txt and categories.js to data/
+- Updated all references in index.html and tools/convert_lists_tool.js
+
 ## [0.17.1] 2026-03-26 — Use official cube-it.co.il icon
 
 - Replaced generated icons with the official icon from cube-it.co.il

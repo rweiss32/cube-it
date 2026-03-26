@@ -5,6 +5,8 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.15.0] 2026-03-26 — Fixed 5 sec timout 
+
 ## [0.15.0] 2026-03-26 — Word suggestions when player misses a round
 
 - If player submits no word, result screen shows 1 short + 1 longer word they could have played from their tiles

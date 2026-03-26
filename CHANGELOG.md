@@ -5,7 +5,14 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
-## [0.15.0] 2026-03-26 — Fixed 5 sec timout 
+## [0.16.0] 2026-03-26 — words.txt + convert_lists_tool
+
+- words.txt: plain-text source of truth for all category word lists (comma-separated, no spaces, correct final Hebrew letters)
+- tools/convert_lists_tool.js: bidirectional converter (js2txt / txt2js) with validation
+- .githooks/pre-push: auto-validates and rebuilds categories.js before every push
+- Fixed 73 pre-existing data issues (duplicates, non-Hebrew chars, wrong final letter forms)
+
+## [0.15.0] 2026-03-26 — Fixed 5 sec timout
 
 ## [0.15.0] 2026-03-26 — Word suggestions when player misses a round
 

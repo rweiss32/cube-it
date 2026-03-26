@@ -11,4 +11,11 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# 2. Warn if version hasn't changed since last push
+LOCAL_VERSION=$(grep -o "const VERSION = '[^']*'" index.html | grep -o "'[^']*'" | tr -d "'")
+REMOTE_VERSION=$(git show origin/master:index.html 2>/dev/null | grep -o "const VERSION = '[^']*'" | grep -o "'[^']*'" | tr -d "'")
+if [ "$LOCAL_VERSION" = "$REMOTE_VERSION" ]; then
+  echo "⚠️  Version is still $LOCAL_VERSION — did you forget to bump it?"
+fi
+
 echo "✅ All checks passed."

@@ -5,6 +5,13 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.17.0] 2026-03-26 — PWA manifest + home screen icon
+
+- manifest.json with app name, RTL/Hebrew locale, theme color (#2a2a50)
+- icons/icon-192.png and icons/icon-512.png (white logo on indigo background)
+- apple-touch-icon for iOS support
+- theme-color meta tag colors the browser chrome on Android
+
 ## [0.16.0] 2026-03-26 — words.txt + convert_lists_tool
 
 - words.txt: plain-text source of truth for all category word lists (comma-separated, no spaces, correct final Hebrew letters)

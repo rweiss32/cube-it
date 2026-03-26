@@ -165,7 +165,7 @@ function txt2js() {
     return `  {\n    "category": ${JSON.stringify(cat.category)},\n    "description": ${JSON.stringify(cat.description)},\n    "words": ${wordsStr}\n  }`;
   });
 
-  const output = `window.CATEGORIES_DATA =\n[\n${entries.join(',\n')}\n]\n`;
+  const output = `// AUTO-GENERATED — do not edit manually.\n// Edit data/words.txt and run: node tools/convert_lists_tool.js txt2js\n\nwindow.CATEGORIES_DATA =\n[\n${entries.join(',\n')}\n]\n`;
   fs.writeFileSync(CATEGORIES_JS, output, 'utf8');
 
   const total = categories.reduce((s, c) => s + c.words.length, 0);

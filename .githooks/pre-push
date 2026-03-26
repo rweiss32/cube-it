@@ -7,27 +7,22 @@ echo "🔍 Running pre-push checks..."
 # Read push info from stdin (local_ref local_sha remote_ref remote_sha)
 read local_ref local_sha remote_ref remote_sha
 
-# Check if data/words.txt changed between remote and local
-WORDS_CHANGED=false
+# Check if data/categories.txt changed between remote and local
+CATS_CHANGED=false
 if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-  # New branch — treat words.txt as changed
-  WORDS_CHANGED=true
-elif ! git diff --quiet "$remote_sha" "$local_sha" -- data/words.txt; then
-  WORDS_CHANGED=true
+  # New branch — treat categories.txt as changed
+  CATS_CHANGED=true
+elif ! git diff --quiet "$remote_sha" "$local_sha" -- data/categories.txt; then
+  CATS_CHANGED=true
 fi
 
-# 1. Validate words.txt and rebuild categories.js
-node tools/convert_lists_tool.js txt2js
-if [ $? -ne 0 ]; then
-  echo "❌ words.txt validation failed. Fix errors above before pushing."
-  exit 1
-fi
-
-# Auto-amend categories.js into the commit if words.txt was part of this push
-if [ "$WORDS_CHANGED" = true ] && ! git diff --quiet data/categories.js; then
-  git add data/categories.js
-  git commit --amend --no-edit
-  echo "✓ categories.js regenerated and amended into commit"
+# 1. Validate and rebuild categories.js only if categories.txt changed
+if [ "$CATS_CHANGED" = true ]; then
+  node tools/convert_lists_tool.js txt2js
+  if [ $? -ne 0 ]; then
+    echo "❌ categories.txt validation failed. Fix errors above before pushing."
+    exit 1
+  fi
 fi
 
 # 2. Warn if version hasn't changed since last push

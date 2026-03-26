@@ -16,8 +16,13 @@ elif ! git diff --quiet "$remote_sha" "$local_sha" -- data/categories.txt; then
   CATS_CHANGED=true
 fi
 
-# 1. Validate and rebuild categories.js only if categories.txt changed
+# 1. If categories.txt changed, ensure categories.js was updated too
 if [ "$CATS_CHANGED" = true ]; then
+  if git diff --quiet "$remote_sha" "$local_sha" -- data/categories.js 2>/dev/null; then
+    echo "❌ categories.txt changed but categories.js was not updated."
+    echo "   Run: node tools/convert_lists_tool.js txt2js, then commit categories.js"
+    exit 1
+  fi
   node tools/convert_lists_tool.js txt2js
   if [ $? -ne 0 ]; then
     echo "❌ categories.txt validation failed. Fix errors above before pushing."

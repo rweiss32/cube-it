@@ -5,6 +5,13 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.18.1] 2026-03-27 — merge command for convert_lists_tool
+
+- New `merge <file.txt>` command to merge a categories.txt-format file into data/categories.txt
+- New categories are appended; existing categories get new words added, duplicates skipped
+- `-v` flag prints per-category detail: added words, skipped duplicates, no-change categories
+- Intra-file duplicates in the input are silently ignored
+
 ## [0.18.0] 2026-03-26 — Settings panel
 
 - Gear icon in header opens a settings bottom sheet

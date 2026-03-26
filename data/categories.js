@@ -1,5 +1,5 @@
 // AUTO-GENERATED — do not edit manually.
-// Edit data/words.txt and run: node tools/convert_lists_tool.js txt2js
+// Edit data/categories.txt and run: node tools/convert_lists_tool.js txt2js
 
 window.CATEGORIES_DATA =
 [

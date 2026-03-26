@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * convert_lists_tool.js — convert between words.txt and categories.js
+ * convert_lists_tool.js — convert between categories.txt and categories.js
  *
  * Usage:
- *   node tools/convert_lists_tool.js txt2js   — data/words.txt  → data/categories.js
- *   node tools/convert_lists_tool.js js2txt   — data/categories.js → data/words.txt
+ *   node tools/convert_lists_tool.js txt2js   — data/categories.txt  → data/categories.js
+ *   node tools/convert_lists_tool.js js2txt   — data/categories.js → data/categories.txt
  *
- * words.txt format:
+ * categories.txt format:
  *   # Category name | hint text (hint is optional)
  *   word1, word2, word3, word4, word5, word6, word7, word8
  *   word9, word10, ...
@@ -25,7 +25,7 @@ const fs   = require('fs');
 const path = require('path');
 
 const ROOT         = path.join(__dirname, '..');
-const WORDS_TXT    = path.join(ROOT, 'data', 'words.txt');
+const WORDS_TXT    = path.join(ROOT, 'data', 'categories.txt');
 const CATEGORIES_JS = path.join(ROOT, 'data', 'categories.js');
 
 const HEBREW_RE  = /^[\u05D0-\u05EA]+$/;  // alef–tav only (includes final forms)
@@ -88,7 +88,7 @@ function js2txt() {
   }
 
   fs.writeFileSync(WORDS_TXT, lines.join('\n'), 'utf8');
-  console.log(`✓ Wrote ${data.length} categories to words.txt`);
+  console.log(`✓ Wrote ${data.length} categories to categories.txt`);
 }
 
 // ─── txt2js ────────────────────────────────────────────────────────────────
@@ -165,7 +165,7 @@ function txt2js() {
     return `  {\n    "category": ${JSON.stringify(cat.category)},\n    "description": ${JSON.stringify(cat.description)},\n    "words": ${wordsStr}\n  }`;
   });
 
-  const output = `// AUTO-GENERATED — do not edit manually.\n// Edit data/words.txt and run: node tools/convert_lists_tool.js txt2js\n\nwindow.CATEGORIES_DATA =\n[\n${entries.join(',\n')}\n]\n`;
+  const output = `// AUTO-GENERATED — do not edit manually.\n// Edit data/categories.txt and run: node tools/convert_lists_tool.js txt2js\n\nwindow.CATEGORIES_DATA =\n[\n${entries.join(',\n')}\n]\n`;
   fs.writeFileSync(CATEGORIES_JS, output, 'utf8');
 
   const total = categories.reduce((s, c) => s + c.words.length, 0);

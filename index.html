@@ -905,8 +905,9 @@ async function endRound(playerWord, warning) {
   const bannerTexts = { win: '🏆 ניצחת!', lose: `😞 ${state.cpuName} ${isCpuFemale() ? 'ניצחה' : 'ניצח'}`, tie: '🤝 תיקו!', none: '😶 אף אחד לא שיחק' };
   const bannerClasses = { win: 'result-banner banner-win', lose: 'result-banner banner-lose', tie: 'result-banner banner-tie', none: 'result-banner banner-tie' };
 
-  document.getElementById('r-banner').textContent = bannerTexts[outcome];
-  document.getElementById('r-banner').className   = bannerClasses[outcome];
+  const bannerEl = document.getElementById('r-banner');
+  bannerEl.textContent = '';
+  bannerEl.className   = 'result-banner';
   document.getElementById('r-player-word').textContent  = finalForm(pw) || '—';
   document.getElementById('r-player-count').textContent = pw ? `${pLen} אותיות` : '';
   document.getElementById('r-player-score').textContent = state.playerScore;
@@ -945,6 +946,8 @@ async function endRound(playerWord, warning) {
   typewriterReveal(cpuWordEl, displayWord, 120, () => {
     cpuCountEl.textContent = cw ? `${cLen} אותיות` : '';
     renderResultTiles('r-cpu-tiles', state.cpuTiles, cw, 'rt-cpu');
+    bannerEl.textContent = bannerTexts[outcome];
+    bannerEl.className   = bannerClasses[outcome];
     cpuReactionEl.textContent = randomReaction(outcome);
     document.getElementById('r-next-btn').disabled = false;
   });

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>קוביאות</title>
-  <!-- VERSION: 0.12.1 -->
+  <!-- VERSION: 0.13.0 -->
   <script src="categories.js"></script>
   <style>
     /* ── THEME TOKENS ── */
@@ -400,6 +400,8 @@
     <div>🤖 <span class="score-num" id="r-cpu-score">0</span></div>
   </div>
 
+  <div id="r-warning" style="margin:10px auto;max-width:360px;padding:8px 14px;border-radius:8px;background:var(--bg-card);color:#b8860b;font-size:0.9rem;display:none;"></div>
+
   <button class="btn btn-gold" id="r-next-btn" onclick="soundClick();nextRound()">סיבוב הבא ▶</button>
 </div>
 
@@ -428,7 +430,7 @@
 </div>
 
 <script>
-const VERSION = '0.12.1';
+const VERSION = '0.13.0';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 function syncBodyPadding() {
@@ -806,22 +808,23 @@ async function submitWord() {
     document.getElementById('g-error').textContent = `"${word}" לא נמצאה במילון. נסה מילה אחרת!`;
     return;
   }
+  let warning = null;
   if (result === null) {
-    document.getElementById('g-error').textContent = '⚠️ לא ניתן לאמת — המילה התקבלה';
+    warning = 'לא ניתן לאמת — המילה התקבלה';
   } else {
-    document.getElementById('g-error').textContent = 'המילה לא מופיעה ברשימה שלנו — וודא שהיא אכן מתאימה להגדרה';
+    warning = 'המילה לא מופיעה ברשימה שלנו — וודא שהיא אכן מתאימה להגדרה';
   }
 
   soundSubmit();
   clearInterval(state.timerHandle);
-  endRound(word);
+  endRound(word, warning);
 }
 
 // ══════════════════════════════════════════════
 //  ROUND END
 // ══════════════════════════════════════════════
 
-function endRound(playerWord) {
+function endRound(playerWord, warning) {
   const pw = norm(playerWord || '');
   const cw = cpuBestWord(state.cpuTiles, state.currentCatKey);
 
@@ -848,6 +851,10 @@ function endRound(playerWord) {
 
   const isLast = state.round >= MAX_ROUNDS;
   document.getElementById('r-next-btn').textContent = isLast ? 'סיום המשחק ★' : 'סיבוב הבא ▶';
+
+  const warnEl = document.getElementById('r-warning');
+  if (warning) { warnEl.textContent = '⚠️ ' + warning; warnEl.style.display = 'block'; }
+  else { warnEl.textContent = ''; warnEl.style.display = 'none'; }
 
   showScreen('screen-result');
 }

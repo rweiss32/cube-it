@@ -6,6 +6,11 @@ Format: `[version] YYYY-MM-DD — description`
 
 ---
 
+## [0.13.0] 2026-03-26 — Fix warning message shown on result screen
+
+- Category/Wiktionary warnings now displayed on the result screen (not the game screen where they were immediately hidden)
+- Warning shown in amber below the score bar
+
 ## [0.12.1] 2026-03-26 — Fix header overlapping content + category validation
 
 - Body padding-top now measured dynamically from actual header height (fixes overlap on all screen sizes)

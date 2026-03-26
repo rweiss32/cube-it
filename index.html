@@ -203,6 +203,21 @@
                  font-size: 0.9rem; font-family: inherit; border: none; cursor: pointer; }
     .btn-clear:hover { background: var(--btn-clear-hover); color: var(--btn-clear-hover-color); }
 
+    /* ── WIKI BOTTOM SHEET ── */
+    #wiki-sheet {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+      background: var(--bg-card);
+      border-radius: 16px 16px 0 0;
+      padding: 14px 20px 28px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      text-align: right;
+    }
+    #wiki-sheet.open { transform: translateY(0); }
+    #wiki-sheet-word { font-weight: 700; font-size: 1rem; }
+    #wiki-sheet-extract { font-size: 0.88rem; line-height: 1.6; margin-top: 6px; color: var(--text); }
+
     /* ── JOKER MODAL ── */
 #joker-modal {
       display: none;
@@ -413,12 +428,7 @@
 
   <div id="r-warning" style="margin:10px auto;max-width:360px;padding:8px 14px;border-radius:8px;background:var(--bg-card);color:#b8860b;font-size:0.9rem;display:none;"></div>
 
-  <div id="r-wiki" style="margin:10px auto;max-width:360px;padding:10px 14px;border-radius:8px;background:var(--bg-card);font-size:0.9rem;text-align:right;line-height:1.6;display:none;">
-    <span style="font-size:0.75rem;color:var(--text-muted);">ויקיפדיה · </span><span id="r-wiki-word" style="font-weight:700;"></span>
-    <div id="r-wiki-extract" style="margin-top:4px;color:var(--text);"></div>
-  </div>
-
-  <button class="btn btn-gold" id="r-next-btn" onclick="soundClick();nextRound()">סיבוב הבא ▶</button>
+<button class="btn btn-gold" id="r-next-btn" onclick="soundClick();nextRound()">סיבוב הבא ▶</button>
 </div>
 
 <!-- ══════════════ GAME OVER ══════════════ -->
@@ -445,6 +455,14 @@
   </div>
 </div>
 
+<!-- ══════════════ WIKI BOTTOM SHEET ══════════════ -->
+<div id="wiki-sheet">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+    <span style="font-size:0.75rem;color:var(--text-muted);">ויקיפדיה</span>
+    <span id="wiki-sheet-word"></span>
+  </div>
+  <div id="wiki-sheet-extract"></div>
+</div>
 
 <script>
 const VERSION = '0.17.3';
@@ -961,7 +979,7 @@ async function endRound(playerWord, warning) {
   const warnEl = document.getElementById('r-warning');
   if (warning) { warnEl.textContent = '⚠️ ' + warning; warnEl.style.display = 'block'; }
   else { warnEl.textContent = ''; warnEl.style.display = 'none'; }
-  document.getElementById('r-wiki').style.display = 'none';
+  closeWikiSheet();
 
   const isLast = state.round >= MAX_ROUNDS;
   document.getElementById('r-next-btn').textContent = isLast ? 'סיום המשחק ★' : 'סיבוב הבא ▶';
@@ -985,7 +1003,7 @@ async function endRound(playerWord, warning) {
     bannerEl.className   = bannerClasses[outcome];
     cpuReactionEl.textContent = randomReaction(outcome);
     document.getElementById('r-next-btn').disabled = false;
-    if (pw) wikiPromise.then(extract => { if (extract) showWikiInline(finalForm(pw), extract); });
+    if (pw) wikiPromise.then(extract => { if (extract) showWikiSheet(finalForm(pw), extract); });
   });
 }
 
@@ -1110,10 +1128,15 @@ async function fetchWikiSummary(word) {
   }
 }
 
-function showWikiInline(word, extract) {
-  document.getElementById('r-wiki-word').textContent = word;
-  document.getElementById('r-wiki-extract').textContent = extract;
-  document.getElementById('r-wiki').style.display = 'block';
+function showWikiSheet(word, extract) {
+  document.getElementById('wiki-sheet-word').textContent = word;
+  document.getElementById('wiki-sheet-extract').textContent = extract;
+  document.getElementById('wiki-sheet').classList.add('open');
+  setTimeout(() => document.addEventListener('click', closeWikiSheet, { once: true }), 0);
+}
+
+function closeWikiSheet() {
+  document.getElementById('wiki-sheet').classList.remove('open');
 }
 
 // ── INIT ──────────────────────────────────────

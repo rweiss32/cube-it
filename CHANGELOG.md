@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.17.4] 2026-03-26 — Wikipedia bottom sheet after successful word
+
+- Show Hebrew Wikipedia summary as a slide-up bottom sheet on the result screen
+- Dismisses on any tap; auto-closes when advancing to next round
+- No-op when Wikipedia has no entry for the word
+
 ## [0.17.3] 2026-03-26 — Wikipedia popup after successful word
 
 - After each round, if the player submitted a word, fetch its Hebrew Wikipedia summary

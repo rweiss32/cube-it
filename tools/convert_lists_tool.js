@@ -90,7 +90,7 @@ function js2txt() {
 // Parse a categories.txt file. Returns { categories, errors }.
 // categories: [{ category, description, words, seen }]
 
-function parseTxt(filePath) {
+function parseTxt(filePath, { ignoreDuplicates = false } = {}) {
   const raw = fs.readFileSync(filePath, 'utf8');
   const lines = raw.split(/\r?\n/);
 
@@ -132,7 +132,8 @@ function parseTxt(filePath) {
 
       const key = norm(word);
       if (current.seen.has(key)) {
-        errors.push(`line ${lineNum}: duplicate word "${word}" in [${current.category}]`);
+        if (!ignoreDuplicates)
+          errors.push(`line ${lineNum}: duplicate word "${word}" in [${current.category}]`);
         continue;
       }
       current.seen.add(key);
@@ -204,7 +205,7 @@ function merge(inputPath, verbose) {
 
   // Parse both files
   const base  = parseTxt(WORDS_TXT);
-  const input = parseTxt(inputPath);
+  const input = parseTxt(inputPath, { ignoreDuplicates: true });
 
   if (base.errors.length > 0) {
     console.error(`✗ Validation errors in categories.txt:`);

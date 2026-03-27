@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.0] 2026-03-27 — Bug fix: score updates after CPU reveal
+
+- Fixed bug where the score was updated while the CPU was still "thinking"
+- Score now stays at its pre-round value during the thinking animation
+- Score updates only after the CPU word is fully revealed, together with the result banner
+
 ## [0.22.1] 2026-03-27 — words-editor improvements
 
 - Header shows live total category and word counts

@@ -5,6 +5,10 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.1] 2026-03-28 — fix: center word in Wikipedia panel
+
+- Centered the word title in the Wikipedia bottom sheet header
+
 ## [0.23.0] 2026-03-27 — Bug fix: score updates after CPU reveal
 
 - Fixed bug where the score was updated while the CPU was still "thinking"

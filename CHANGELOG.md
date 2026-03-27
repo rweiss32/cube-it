@@ -5,6 +5,10 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.21.1] 2026-03-27 — Prevent text selection on tiles
+
+- Added user-select: none to tiles to prevent letters from being highlighted when dragging
+
 ## [0.21.0] 2026-03-27 — Drag tile to word-builder area
 
 - Long-press a tile and drag it to the word-builder area to add it to the word

@@ -87,13 +87,21 @@
     }
     .word-chip {
       background: #f5e6c8; color: #2a1a00;
-      padding: 5px 13px; border-radius: 20px;
+      padding: 5px 10px 5px 13px; border-radius: 20px;
       font-size: 1rem; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 6px;
     }
     .word-chip.new {
       background: #4ecca3; color: #0a1a14;
       animation: fadein 0.4s ease;
     }
+    .word-chip .remove-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 0.75rem; color: #a0703a; line-height: 1;
+      padding: 0; opacity: 0.5;
+    }
+    .word-chip .remove-btn:hover { opacity: 1; color: #e94560; }
+    .word-chip.new .remove-btn { color: #0a5a3a; }
     @keyframes fadein { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
     .empty-msg { color: #bbb; font-size: 0.9rem; padding: 4px; }
 
@@ -164,6 +172,7 @@ const HEBREW_RE  = /^[\u05D0-\u05EA]+$/;
 
 function norm(w)      { return [...(w||'')].map(c => FINAL_MAP[c] ?? c).join('').trim(); }
 function finalForm(w) { if (!w) return w; const l = w[w.length-1]; return SUFFIX_MAP[l] ? w.slice(0,-1)+SUFFIX_MAP[l] : w; }
+function hebrewSort(arr) { return [...arr].sort((a, b) => norm(a).localeCompare(norm(b), 'he')); }
 
 // ── State ─────────────────────────────────────────────────────────────────
 let fileHandle  = null;
@@ -276,10 +285,27 @@ function renderWords(highlightLast = false) {
     list.innerHTML = '<span class="empty-msg">אין מילים עדיין — הקלד מילה ראשונה למטה</span>';
     return;
   }
-  cat.words.forEach((word, idx) => {
+  const sorted = hebrewSort(cat.words);
+  const lastWord = highlightLast ? cat.words[cat.words.length - 1] : null;
+  sorted.forEach(word => {
     const chip = document.createElement('span');
-    chip.className = 'word-chip' + (highlightLast && idx === cat.words.length - 1 ? ' new' : '');
-    chip.textContent = word;
+    chip.className = 'word-chip' + (word === lastWord ? ' new' : '');
+    const label = document.createTextNode(word);
+    const btn = document.createElement('button');
+    btn.className = 'remove-btn';
+    btn.title = 'הסר מילה';
+    btn.textContent = '✕';
+    btn.addEventListener('click', async () => {
+      const key = norm(word);
+      cat.words = cat.words.filter(w => norm(w) !== key);
+      cat.seen.delete(key);
+      await saveFile();
+      renderCatList();
+      renderWords();
+      document.getElementById('word-input').focus();
+    });
+    chip.appendChild(label);
+    chip.appendChild(btn);
     list.appendChild(chip);
   });
 }

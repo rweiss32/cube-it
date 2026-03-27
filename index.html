@@ -1061,6 +1061,7 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
     });
 
     // Letter grid
+    let onOutside = null;
     const grid = document.getElementById('letter-grid');
     grid.innerHTML = '';
     HE_LETTERS.forEach(letter => {
@@ -1068,6 +1069,7 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
       btn.className = 'letter-pick-btn';
       btn.textContent = letter;
       btn.onclick = () => {
+        if (onOutside) { modal.removeEventListener('click', onOutside); onOutside = null; }
         _jokerResolve = null;
         modal.classList.remove('open');
         resolve(letter);
@@ -1079,12 +1081,14 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
 
     // Click outside to cancel
     setTimeout(() => {
-      modal.addEventListener('click', function onOutside(e) {
+      onOutside = function(e) {
         if (!e.target.closest('.joker-box')) {
           modal.removeEventListener('click', onOutside);
+          onOutside = null;
           cancelJoker();
         }
-      });
+      };
+      modal.addEventListener('click', onOutside);
     }, 0);
   });
 }

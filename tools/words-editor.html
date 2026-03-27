@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <title>קוביאות — עורך מילים</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f0f5; color: #1a1a2e;
+      height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #2a2a50; color: white;
+      padding: 10px 18px; display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0;
+    }
+    header h1 { font-size: 1rem; flex: 1; }
+    #status { font-size: 0.8rem; color: #aaa; }
+    .btn {
+      padding: 7px 14px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 0.88rem; font-family: inherit; font-weight: 600;
+    }
+    .btn-primary { background: #4ecca3; color: #0a1a14; }
+    .btn-primary:hover { background: #3db892; }
+    .btn-secondary { background: #3a3a6a; color: #ccc; }
+    .btn-secondary:hover { background: #4a4a7a; }
+
+    /* ── Splash ── */
+    #splash {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px; color: #666;
+    }
+    #splash h2 { font-size: 1.4rem; color: #2a2a50; }
+    #splash small { font-size: 0.82rem; color: #aaa; }
+
+    /* ── Main layout ── */
+    #main { display: none; flex: 1; overflow: hidden; }
+
+    /* ── Categories panel ── */
+    .panel-cats {
+      width: 230px; background: #e8e8f4;
+      border-left: 1px solid #ccc;
+      display: flex; flex-direction: column; flex-shrink: 0;
+    }
+    .panel-label {
+      padding: 9px 14px; font-size: 0.75rem; font-weight: 700;
+      color: #888; text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid #ccc; background: #ddddf0;
+    }
+    .cat-list { flex: 1; overflow-y: auto; }
+    .cat-item {
+      padding: 9px 14px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #d5d5ea; font-size: 0.95rem;
+    }
+    .cat-item:hover { background: #d5d5ea; }
+    .cat-item.active { background: #2a2a50; color: white; }
+    .cat-item.active .cat-badge { background: rgba(255,255,255,0.2); color: white; }
+    .cat-badge {
+      font-size: 0.72rem; background: #ccc; color: #555;
+      padding: 1px 6px; border-radius: 10px;
+    }
+    .add-cat-area { padding: 10px; border-top: 1px solid #ccc; display: flex; flex-direction: column; gap: 6px; }
+    #add-cat-input {
+      display: none; padding: 7px 10px; border: 1px solid #aaa;
+      border-radius: 6px; font-size: 0.9rem; font-family: inherit; direction: rtl;
+      width: 100%;
+    }
+    #add-cat-input:focus { outline: none; border-color: #4ecca3; }
+
+    /* ── Words panel ── */
+    .panel-words { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .words-header {
+      padding: 11px 18px; border-bottom: 1px solid #ccc;
+      display: flex; align-items: baseline; gap: 8px; flex-shrink: 0;
+      background: white;
+    }
+    .words-header h2 { font-size: 1.1rem; }
+    #words-hint { font-size: 0.85rem; color: #888; }
+    #word-count { margin-right: auto; font-size: 0.8rem; color: #aaa; }
+    .word-list {
+      flex: 1; overflow-y: auto; padding: 14px 18px;
+      display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start;
+    }
+    .word-chip {
+      background: #f5e6c8; color: #2a1a00;
+      padding: 5px 13px; border-radius: 20px;
+      font-size: 1rem; font-weight: 600;
+    }
+    .word-chip.new {
+      background: #4ecca3; color: #0a1a14;
+      animation: fadein 0.4s ease;
+    }
+    @keyframes fadein { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+    .empty-msg { color: #bbb; font-size: 0.9rem; padding: 4px; }
+
+    /* ── Input area ── */
+    .word-input-area {
+      padding: 12px 18px; border-top: 1px solid #ccc;
+      background: white; flex-shrink: 0;
+    }
+    #word-input {
+      width: 100%; padding: 10px 14px; border: 2px solid #ccc;
+      border-radius: 8px; font-size: 1.05rem; font-family: inherit;
+      direction: rtl; outline: none;
+    }
+    #word-input:focus { border-color: #4ecca3; }
+    #word-input.error { border-color: #e94560; }
+    #word-error { margin-top: 5px; font-size: 0.85rem; color: #e94560; min-height: 1.1em; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎲 קוביאות — עורך מילים</h1>
+  <button class="btn btn-primary" onclick="openFile()">📂 פתח categories.txt</button>
+  <span id="status"></span>
+</header>
+
+<div id="splash">
+  <h2>עורך קטגוריות ומילים</h2>
+  <p>לחץ על "פתח categories.txt" כדי להתחיל</p>
+  <small>נדרש Edge או Chrome</small>
+</div>
+
+<div id="main">
+  <!-- Words panel (right side in RTL = left visually) -->
+  <div class="panel-words">
+    <div class="words-header">
+      <h2 id="words-title">בחר קטגוריה</h2>
+      <span id="words-hint"></span>
+      <span id="word-count"></span>
+    </div>
+    <div class="word-list" id="word-list">
+      <span class="empty-msg">בחר קטגוריה מהרשימה</span>
+    </div>
+    <div class="word-input-area" id="word-input-area" style="display:none">
+      <input type="text" id="word-input" placeholder="הקלד מילה חדשה ולחץ Enter..." autocomplete="off" spellcheck="false" />
+      <div id="word-error"></div>
+    </div>
+  </div>
+
+  <!-- Categories panel -->
+  <div class="panel-cats">
+    <div class="panel-label">קטגוריות</div>
+    <div class="cat-list" id="cat-list"></div>
+    <div class="add-cat-area">
+      <input type="text" id="add-cat-input" placeholder="שם קטגוריה חדשה..." spellcheck="false" />
+      <button class="btn btn-secondary" id="btn-add-cat" onclick="toggleAddCat()" style="width:100%">+ קטגוריה חדשה</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── Hebrew utils ──────────────────────────────────────────────────────────
+const FINAL_MAP  = {'\u05DD':'\u05DE','\u05DF':'\u05E0','\u05E3':'\u05E4','\u05DA':'\u05DB','\u05E5':'\u05E6'};
+const SUFFIX_MAP = {'\u05DE':'\u05DD','\u05E0':'\u05DF','\u05E4':'\u05E3','\u05DB':'\u05DA','\u05E6':'\u05E5'};
+const HEBREW_RE  = /^[\u05D0-\u05EA]+$/;
+
+function norm(w)      { return [...(w||'')].map(c => FINAL_MAP[c] ?? c).join('').trim(); }
+function finalForm(w) { if (!w) return w; const l = w[w.length-1]; return SUFFIX_MAP[l] ? w.slice(0,-1)+SUFFIX_MAP[l] : w; }
+
+// ── State ─────────────────────────────────────────────────────────────────
+let fileHandle  = null;
+let categories  = [];   // [{ name, hint, words:[], seen:Set }]
+let selectedCat = null;
+let addingCat   = false;
+
+// ── File I/O ──────────────────────────────────────────────────────────────
+async function openFile() {
+  try {
+    [fileHandle] = await window.showOpenFilePicker({
+      types: [{ description: 'Text files', accept: { 'text/plain': ['.txt'] } }]
+    });
+    const file = await fileHandle.getFile();
+    parseCategories(await file.text());
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('main').style.display = 'flex';
+    renderCatList();
+    setStatus('✓ ' + file.name);
+  } catch (e) {
+    if (e.name !== 'AbortError') setStatus('❌ שגיאה בפתיחת הקובץ');
+  }
+}
+
+async function saveFile() {
+  if (!fileHandle) return;
+  try {
+    const writable = await fileHandle.createWritable();
+    await writable.write(serialize());
+    await writable.close();
+    setStatus('✓ נשמר', 2000);
+  } catch (e) {
+    setStatus('❌ שגיאה בשמירה');
+  }
+}
+
+// ── Parse / Serialize ─────────────────────────────────────────────────────
+function parseCategories(text) {
+  categories = [];
+  let current = null;
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('##')) continue;
+    if (line.startsWith('#')) {
+      const [nameRaw, ...hintParts] = line.slice(1).trim().split('|');
+      const name = nameRaw.trim();
+      if (!name) continue;
+      current = { name, hint: hintParts.join('|').trim(), words: [], seen: new Set() };
+      categories.push(current);
+    } else if (current) {
+      for (const w of line.split(',').map(w => w.trim()).filter(Boolean)) {
+        const word = finalForm(norm(w));
+        const key  = norm(word);
+        if (!current.seen.has(key)) { current.seen.add(key); current.words.push(word); }
+      }
+    }
+  }
+}
+
+function serialize() {
+  const lines = [
+    '## קוביאות — רשימת מילים לפי קטגוריות',
+    '## פורמט: שורת כותרת מתחילה ב-#  ואחריה שם קטגוריה | רמז (רמז הוא אופציונלי)',
+    '## מילים מופרדות בפסיקים, מספר מילים בכל שורה. שורה ריקה מפרידה בין קטגוריות.',
+    '',
+  ];
+  for (const cat of categories) {
+    lines.push(cat.hint ? `# ${cat.name} | ${cat.hint}` : `# ${cat.name}`);
+    for (let i = 0; i < cat.words.length; i += 8)
+      lines.push(cat.words.slice(i, i + 8).join(','));
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
+// ── Validation ────────────────────────────────────────────────────────────
+function validateWord(raw, cat) {
+  const n = norm(raw);
+  if (!n) return 'המילה ריקה';
+  if (!HEBREW_RE.test(n)) return 'אותיות עבריות בלבד';
+  if ([...n].length > 8) return `המילה ארוכה מדי — ${[...n].length} אותיות (מקסימום 8)`;
+  if (cat.seen.has(n)) return `"${finalForm(n)}" כבר קיימת בקטגוריה זו`;
+  return null;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function renderCatList() {
+  const list = document.getElementById('cat-list');
+  list.innerHTML = '';
+  categories.forEach(cat => {
+    const div = document.createElement('div');
+    div.className = 'cat-item' + (cat === selectedCat ? ' active' : '');
+    div.innerHTML = `<span>${cat.name}</span><span class="cat-badge">${cat.words.length}</span>`;
+    div.onclick = () => selectCategory(cat);
+    list.appendChild(div);
+  });
+}
+
+function renderWords(highlightLast = false) {
+  const cat = selectedCat;
+  document.getElementById('words-title').textContent   = cat ? cat.name : 'בחר קטגוריה';
+  document.getElementById('words-hint').textContent    = cat?.hint ? `| ${cat.hint}` : '';
+  document.getElementById('word-count').textContent    = cat ? `${cat.words.length} מילים` : '';
+  document.getElementById('word-input-area').style.display = cat ? '' : 'none';
+  document.getElementById('word-error').textContent   = '';
+
+  const list = document.getElementById('word-list');
+  list.innerHTML = '';
+  if (!cat || cat.words.length === 0) {
+    list.innerHTML = '<span class="empty-msg">אין מילים עדיין — הקלד מילה ראשונה למטה</span>';
+    return;
+  }
+  cat.words.forEach((word, idx) => {
+    const chip = document.createElement('span');
+    chip.className = 'word-chip' + (highlightLast && idx === cat.words.length - 1 ? ' new' : '');
+    chip.textContent = word;
+    list.appendChild(chip);
+  });
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────
+function selectCategory(cat) {
+  selectedCat = cat;
+  renderCatList();
+  renderWords();
+  setTimeout(() => document.getElementById('word-input').value = '' || document.getElementById('word-input').focus(), 30);
+}
+
+function toggleAddCat() {
+  addingCat = !addingCat;
+  const input = document.getElementById('add-cat-input');
+  const btn   = document.getElementById('btn-add-cat');
+  if (addingCat) {
+    input.style.display = 'block';
+    input.value = '';
+    btn.textContent = 'ביטול';
+    input.focus();
+  } else {
+    input.style.display = 'none';
+    btn.textContent = '+ קטגוריה חדשה';
+  }
+}
+
+document.getElementById('add-cat-input').addEventListener('keydown', async e => {
+  if (e.key === 'Escape') { toggleAddCat(); return; }
+  if (e.key !== 'Enter') return;
+  const name = e.target.value.trim();
+  if (!name) return;
+  if (categories.find(c => c.name === name)) {
+    e.target.style.borderColor = '#e94560';
+    return;
+  }
+  const cat = { name, hint: '', words: [], seen: new Set() };
+  categories.push(cat);
+  toggleAddCat();
+  await saveFile();
+  renderCatList();
+  selectCategory(cat);
+});
+
+document.getElementById('word-input').addEventListener('keydown', async e => {
+  if (e.key !== 'Enter') return;
+  const raw   = e.target.value.trim();
+  const input = document.getElementById('word-input');
+  const error = document.getElementById('word-error');
+
+  const msg = validateWord(raw, selectedCat);
+  if (msg) {
+    error.textContent = msg;
+    input.classList.add('error');
+    return;
+  }
+
+  const word = finalForm(norm(raw));
+  selectedCat.seen.add(norm(word));
+  selectedCat.words.push(word);
+  input.value = '';
+  error.textContent = '';
+  input.classList.remove('error');
+
+  await saveFile();
+  renderCatList();
+  renderWords(true);
+  document.getElementById('word-input').focus();
+});
+
+document.getElementById('word-input').addEventListener('input', () => {
+  document.getElementById('word-input').classList.remove('error');
+  document.getElementById('word-error').textContent = '';
+});
+
+// ── Status ────────────────────────────────────────────────────────────────
+let _statusTimer = null;
+function setStatus(msg, clearAfter) {
+  clearTimeout(_statusTimer);
+  document.getElementById('status').textContent = msg;
+  if (clearAfter) _statusTimer = setTimeout(() => document.getElementById('status').textContent = '', clearAfter);
+}
+
+// ── API check ─────────────────────────────────────────────────────────────
+if (!window.showOpenFilePicker) {
+  document.getElementById('splash').innerHTML = '<h2>דפדפן לא נתמך</h2><p>פתח את הכלי ב-Edge או Chrome</p>';
+  document.querySelector('header .btn').disabled = true;
+}
+</script>
+</body>
+</html>
+```

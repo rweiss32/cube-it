@@ -5,6 +5,18 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.21.2] 2026-03-27 — words-editor tool improvements
+
+- Renamed tool to cube-it-words-editor.html
+- Words sorted alphabetically in the saved file (not just in display)
+- Remove word: ✕ button on each word chip
+- Edit word: click word label to edit inline (Enter saves, Escape cancels)
+- Delete category: trash icon with confirmation dialog
+- Edit category name: pencil icon to rename inline
+- Drag & drop a .txt file onto the page to open it (no button needed)
+- File picker remembers last used folder across opens in the same session
+- Fixed input field showing "undefined" when selecting a category
+
 ## [0.21.1] 2026-03-27 — Prevent text selection on tiles
 
 - Added user-select: none to tiles to prevent letters from being highlighted when dragging

@@ -32,6 +32,13 @@
     #splash {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 10px; color: #666;
+      border: 3px dashed transparent; transition: border-color 0.2s, background 0.2s;
+    }
+    #splash.drag-over {
+      border-color: #4ecca3; background: rgba(78,204,163,0.07);
+    }
+    body.drag-over-active #main {
+      outline: 3px dashed #4ecca3;
     }
     #splash h2 { font-size: 1.4rem; color: #2a2a50; }
     #splash small { font-size: 0.82rem; color: #aaa; }
@@ -182,7 +189,7 @@
 
 <div id="splash">
   <h2>עורך קטגוריות ומילים</h2>
-  <p>לחץ על "פתח קובץ" כדי להתחיל</p>
+  <p>לחץ על "פתח קובץ" או גרור קובץ לכאן</p>
   <small>נדרש Edge או Chrome</small>
 </div>
 
@@ -246,9 +253,9 @@ let addingCat   = false;
 // ── File I/O ──────────────────────────────────────────────────────────────
 async function openFile() {
   try {
-    [fileHandle] = await window.showOpenFilePicker({
-      types: [{ description: 'Text files', accept: { 'text/plain': ['.txt'] } }]
-    });
+    const pickerOpts = { types: [{ description: 'Text files', accept: { 'text/plain': ['.txt'] } }] };
+    if (fileHandle) pickerOpts.startIn = fileHandle;
+    [fileHandle] = await window.showOpenFilePicker(pickerOpts);
     const file = await fileHandle.getFile();
     parseCategories(await file.text());
     document.getElementById('splash').style.display = 'none';
@@ -304,8 +311,9 @@ function serialize() {
   ];
   for (const cat of categories) {
     lines.push(cat.hint ? `# ${cat.name} | ${cat.hint}` : `# ${cat.name}`);
-    for (let i = 0; i < cat.words.length; i += 8)
-      lines.push(cat.words.slice(i, i + 8).join(','));
+    const sorted = hebrewSort(cat.words);
+    for (let i = 0; i < sorted.length; i += 8)
+      lines.push(sorted.slice(i, i + 8).join(','));
     lines.push('');
   }
   return lines.join('\n');
@@ -605,6 +613,44 @@ function setStatus(msg, clearAfter) {
   document.getElementById('status').textContent = msg;
   if (clearAfter) _statusTimer = setTimeout(() => document.getElementById('status').textContent = '', clearAfter);
 }
+
+// ── Drag & drop to open file ──────────────────────────────────────────────
+document.addEventListener('dragover', e => {
+  e.preventDefault();
+  document.getElementById('splash').classList.add('drag-over');
+});
+document.addEventListener('dragleave', e => {
+  if (e.relatedTarget === null) document.getElementById('splash').classList.remove('drag-over');
+});
+document.addEventListener('drop', async e => {
+  e.preventDefault();
+  document.getElementById('splash').classList.remove('drag-over');
+  const item = [...e.dataTransfer.items].find(i => i.kind === 'file');
+  if (!item) return;
+  let handle;
+  if (item.getAsFileSystemHandle) {
+    handle = await item.getAsFileSystemHandle();
+  }
+  if (!handle || handle.kind !== 'file') {
+    // fallback: read via File object (no write access)
+    const file = item.getAsFile();
+    if (!file || !file.name.endsWith('.txt')) { setStatus('❌ גרור קובץ .txt בלבד'); return; }
+    parseCategories(await file.text());
+    fileHandle = null;
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('main').style.display = 'flex';
+    renderCatList();
+    setStatus('⚠️ ' + file.name + ' (קריאה בלבד — גישת כתיבה לא זמינה)');
+    return;
+  }
+  fileHandle = handle;
+  const file = await fileHandle.getFile();
+  parseCategories(await file.text());
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('main').style.display = 'flex';
+  renderCatList();
+  setStatus('✓ ' + file.name);
+});
 
 // ── API check ─────────────────────────────────────────────────────────────
 if (!window.showOpenFilePicker) {

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>קוביאות</title>
-  <!-- VERSION: 0.19.0 -->
+  <!-- VERSION: 0.20.0 -->
   <meta name="author" content="Raviv Weiss" />
   <!-- Built by Raviv Weiss -->
   <link rel="manifest" href="manifest.json" />
@@ -204,6 +204,7 @@
     .tiles-section { width: 100%; }
     .tiles-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
     .tiles-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    #g-tiles.tiles-dragging .tile { transition: transform 0.15s ease; }
     .tile {
       width: 58px; height: 58px; background: #f5e6c8; color: #2a1a00;
       border-radius: 8px; border: none; font-size: 1.7rem; font-weight: 700;
@@ -537,7 +538,7 @@
 </div>
 
 <script>
-const VERSION = '0.19.0';
+const VERSION = '0.20.0';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -783,9 +784,148 @@ function renderTiles() {
     const isSelected = state.selectedIndices.includes(i);
     btn.className = 'tile' + (letter === '★' ? ' joker' : '') + (isSelected ? ' selected used' : '');
     btn.textContent = letter === '★' ? '★' : letter;
+    btn.dataset.tileIndex = i;
     if (!isSelected) btn.onclick = () => selectTile(i);
+    initTileDrag(btn, i);
     container.appendChild(btn);
   });
+}
+
+// ── TILE DRAG-TO-REORDER ──────────────────────────────────────────────────
+
+function initTileDrag(btn, i) {
+  let pressTimer   = null;
+  let dragging     = false;
+  let clone        = null;
+  let offsetX      = 0, offsetY = 0;
+  let currentTo    = i;  // live insertion index
+  let shiftPx      = 0;
+
+  function getTileShift() {
+    const container = document.getElementById('g-tiles');
+    const tiles = [...container.querySelectorAll('[data-tile-index]')];
+    if (tiles.length < 2) return 66;
+    const r0 = tiles[0].getBoundingClientRect();
+    const r1 = tiles[1].getBoundingClientRect();
+    return Math.abs(r0.left - r1.left); // tile width + gap
+  }
+
+  function applyPreview(toIndex) {
+    if (toIndex === currentTo) return;
+    currentTo = toIndex;
+    document.getElementById('g-tiles').querySelectorAll('[data-tile-index]').forEach(el => {
+      const idx = parseInt(el.dataset.tileIndex);
+      if (idx === i) return;
+      let dx = 0;
+      if (i < toIndex && idx > i && idx <= toIndex) dx =  shiftPx; // shift right
+      if (i > toIndex && idx >= toIndex && idx < i) dx = -shiftPx; // shift left
+      el.style.transform = dx ? `translateX(${dx}px)` : '';
+    });
+  }
+
+  function resetPreview() {
+    const container = document.getElementById('g-tiles');
+    container.classList.remove('tiles-dragging');
+    container.querySelectorAll('[data-tile-index]').forEach(el => el.style.transform = '');
+  }
+
+  function startDrag(clientX, clientY) {
+    dragging = true;
+    currentTo = i;
+    shiftPx = getTileShift();
+    if (navigator.vibrate) navigator.vibrate(30);
+
+    document.getElementById('g-tiles').classList.add('tiles-dragging');
+
+    const rect = btn.getBoundingClientRect();
+    offsetX = clientX - rect.left;
+    offsetY = clientY - rect.top;
+
+    clone = btn.cloneNode(true);
+    Object.assign(clone.style, {
+      position: 'fixed', zIndex: 999, pointerEvents: 'none',
+      width: rect.width + 'px', height: rect.height + 'px',
+      top: rect.top + 'px', left: rect.left + 'px',
+      opacity: '0.9', transform: 'scale(1.15)',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.35)', transition: 'none',
+    });
+    document.body.appendChild(clone);
+    btn.style.opacity = '0.25';
+  }
+
+  function moveClone(clientX, clientY) {
+    if (!clone) return;
+    clone.style.left = (clientX - offsetX) + 'px';
+    clone.style.top  = (clientY - offsetY) + 'px';
+
+    const el = document.elementFromPoint(clientX, clientY);
+    const target = el?.closest('[data-tile-index]');
+    if (target) {
+      const idx = parseInt(target.dataset.tileIndex);
+      if (!isNaN(idx)) applyPreview(idx);
+    }
+  }
+
+  function commitDrag() {
+    const j = currentTo;
+    clone?.remove(); clone = null;
+    btn.style.opacity = '';
+    dragging = false;
+    resetPreview();
+
+    if (j === i) return;
+    const [tile] = state.playerTiles.splice(i, 1);
+    state.playerTiles.splice(j, 0, tile);
+    state.selectedIndices = state.selectedIndices.map(idx => {
+      if (idx === i) return j;
+      if (i < j && idx > i && idx <= j) return idx - 1;
+      if (i > j && idx >= j && idx < i) return idx + 1;
+      return idx;
+    });
+    renderTiles();
+    renderWordPreview();
+  }
+
+  function cancel() {
+    clearTimeout(pressTimer);
+    clone?.remove(); clone = null;
+    btn.style.opacity = '';
+    dragging = false;
+    resetPreview();
+  }
+
+  // ── Touch ──
+  btn.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    pressTimer = setTimeout(() => startDrag(t.clientX, t.clientY), 350);
+  }, { passive: true });
+
+  btn.addEventListener('touchmove', e => {
+    if (!dragging) { clearTimeout(pressTimer); return; }
+    e.preventDefault();
+    moveClone(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: false });
+
+  btn.addEventListener('touchend', e => {
+    clearTimeout(pressTimer);
+    if (!dragging) return;
+    commitDrag();
+  });
+
+  btn.addEventListener('touchcancel', cancel);
+
+  // ── Mouse (desktop) ──
+  btn.addEventListener('mousedown', e => {
+    pressTimer = setTimeout(() => {
+      startDrag(e.clientX, e.clientY);
+      const onMove = ev => moveClone(ev.clientX, ev.clientY);
+      const onUp   = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); commitDrag(); };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    }, 350);
+  });
+  btn.addEventListener('mouseup',    () => clearTimeout(pressTimer));
+  btn.addEventListener('mouseleave', () => { if (!dragging) clearTimeout(pressTimer); });
 }
 
 function renderWordPreview() {

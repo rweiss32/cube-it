@@ -5,6 +5,14 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.20.0] 2026-03-27 — Drag to reorder tiles
+
+- Long-press a tile (400ms) to drag it to a new position in the tray
+- Tile is inserted at the drop position; tiles in between shift to fill the gap
+- Short tap still selects the letter for the word as before
+- Works on touch (mobile) and mouse (desktop)
+- Haptic feedback on drag start
+
 ## [0.19.0] 2026-03-27 — Full PWA support (offline + install prompt)
 
 - Added service worker (sw.js) with cache-first strategy for all static assets

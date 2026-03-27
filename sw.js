@@ -1,6 +1,6 @@
 // Service Worker — קוביאות
 // Update CACHE version whenever a new app version is deployed.
-const CACHE = 'cubeit-v0.23.2';
+const CACHE = 'cubeit-v0.23.3';
 
 const STATIC = [
   '/',

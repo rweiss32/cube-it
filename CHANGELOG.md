@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.3] 2026-03-28 — fix: show assigned letters in multi-joker preview
+
+- Fixed bug where already-assigned jokers always showed '?' in the preview when assigning multiple jokers
+- Each resolved joker now correctly displays its chosen letter while the next joker is being assigned
+
 ## [0.23.2] 2026-03-28 — chore: add /web-code-review skill
 
 - Added `/web-code-review` Claude Code skill for expert HTML/CSS/JS review

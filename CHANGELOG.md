@@ -5,6 +5,14 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.22.1] 2026-03-27 — words-editor improvements
+
+- Header shows live total category and word counts
+- Input box accepts comma-separated words (e.g. בית,כלב,ספר) — all added in one go
+- Error message stays visible until user starts typing again
+- File picker remembers last used folder within the session
+- Drag & drop a .txt file onto the page to open it
+
 ## [0.22.0] 2026-03-27 — Expanded word lists
 
 - Added many new words across categories in data/categories.txt

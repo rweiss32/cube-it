@@ -5,6 +5,13 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.19.0] 2026-03-27 — Full PWA support (offline + install prompt)
+
+- Added service worker (sw.js) with cache-first strategy for all static assets
+- App works fully offline after first load (except Wiktionary/Wikipedia lookups)
+- Browser will offer "Add to home screen" install prompt
+- Cache versioned to match app version — auto-invalidates on deploy
+
 ## [0.18.1] 2026-03-27 — merge command for convert_lists_tool
 
 - New `merge <file.txt>` command to merge a categories.txt-format file into data/categories.txt

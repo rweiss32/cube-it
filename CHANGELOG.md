@@ -5,6 +5,13 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.10] 2026-03-28 — chore: minor code and accessibility polish
+
+- Added `noreferrer` to external purchase links
+- Wrapped decorative chars (▶ ✓ ✕ ↺ ★) in `aria-hidden` spans so screen readers skip them
+- Simplified redundant `letter === '★' ? '★' : letter` to just `letter`
+- Removed stale `<!-- VERSION: 0.21.1 -->` HTML comment
+
 ## [0.23.9] 2026-03-28 — chore: DOM query caching, magic number constants, inline styles to CSS classes
 
 - Cached g-timer-bar, g-tiles, and g-word-preview DOM references to avoid repeated lookups in hot paths

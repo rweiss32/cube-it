@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>קוביאות</title>
-  <!-- VERSION: 0.21.1 -->
   <meta name="author" content="Raviv Weiss" />
   <!-- Built by Raviv Weiss -->
   <link rel="manifest" href="manifest.json" />
@@ -417,13 +416,13 @@
     • המילה הארוכה ביותר זוכה בקלף<br>
     • <strong>5 סיבובים</strong> — מי שאסף יותר קלפים מנצח!
   </div>
-  <button class="btn btn-gold" onclick="startGame()">התחל משחק ▶</button>
+  <button class="btn btn-gold" onclick="startGame()">התחל משחק <span aria-hidden="true">▶</span></button>
   <div class="cta-box">
     <div class="cta-text">
       <strong>🎲 רוצה את המשחק המלא?</strong>
       המשחק הפיזי כולל 62 קוביות, 40 קלפי הגדרה ו-3 סגנונות משחק
     </div>
-    <a class="btn-cta" href="https://www.cube-it.co.il/" target="_blank" rel="noopener">לרכישה ←</a>
+    <a class="btn-cta" href="https://www.cube-it.co.il/" target="_blank" rel="noopener noreferrer">לרכישה ←</a>
   </div>
 </div>
 
@@ -462,8 +461,8 @@
     <div class="error-msg" id="g-error"></div>
     <div class="checking-msg" id="g-checking"></div>
     <div class="action-row">
-      <button class="btn-clear" id="btn-clear" onclick="clearWord()">נקה ✕</button>
-      <button class="btn-submit" id="btn-submit" onclick="submitWord()">שלח מילה ✓</button>
+      <button class="btn-clear" id="btn-clear" onclick="clearWord()">נקה <span aria-hidden="true">✕</span></button>
+      <button class="btn-submit" id="btn-submit" onclick="submitWord()">שלח מילה <span aria-hidden="true">✓</span></button>
     </div>
   </div>
 </div>
@@ -506,20 +505,20 @@
 <div id="screen-gameover" class="screen">
   <div class="gameover-title" id="go-title">—</div>
   <div class="final-score" id="go-score"></div>
-  <button class="btn btn-gold" style="margin-top:12px" onclick="startGame()">שחק שוב ↺</button>
+  <button class="btn btn-gold" style="margin-top:12px" onclick="startGame()">שחק שוב <span aria-hidden="true">↺</span></button>
   <div class="cta-box cta-gameover">
     <div class="cta-text">
       <strong>🎲 אהבת? קנה את הגרסה המלאה!</strong>
       המשחק הפיזי של קוביאות כולל 62 קוביות, 40 קלפי הגדרה, 3 סגנונות משחק ועד 4 שחקנים
     </div>
-    <a class="btn-cta" href="https://www.cube-it.co.il/" target="_blank" rel="noopener">לרכישה באתר ←</a>
+    <a class="btn-cta" href="https://www.cube-it.co.il/" target="_blank" rel="noopener noreferrer">לרכישה באתר ←</a>
   </div>
 </div>
 
 <!-- ══════════════ JOKER MODAL ══════════════ -->
 <div id="joker-modal">
   <div class="joker-box">
-    <button id="joker-close-btn" onclick="cancelJoker()" aria-label="סגור">✕</button>
+    <button id="joker-close-btn" onclick="cancelJoker()" aria-label="סגור"><span aria-hidden="true">✕</span></button>
     <h3>הג'וקר מייצג איזו אות?</h3>
     <p id="joker-modal-subtitle"></p>
     <div class="joker-word-preview" id="joker-word-preview"></div>
@@ -556,7 +555,7 @@
 </div>
 
 <script>
-const VERSION = '0.23.9';
+const VERSION = '0.23.10';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -814,7 +813,7 @@ function renderTiles() {
     const btn = document.createElement('button');
     const isSelected = state.selectedIndices.includes(i);
     btn.className = 'tile' + (letter === '★' ? ' joker' : '') + (isSelected ? ' selected used' : '');
-    btn.textContent = letter === '★' ? '★' : letter;
+    btn.textContent = letter;
     btn.dataset.tileIndex = i;
     if (!isSelected) btn.onclick = () => selectTile(i);
     initTileDrag(btn, i);
@@ -999,7 +998,7 @@ function renderWordPreview() {
     const letter = state.playerTiles[tileIdx];
     const btn = document.createElement('button');
     btn.className = 'word-tile';
-    btn.textContent = letter === '★' ? '★' : letter;
+    btn.textContent = letter;
     btn.onclick = () => deselectTile(wordPos);
     container.appendChild(btn);
   });
@@ -1329,7 +1328,7 @@ async function endRound(playerWord, warning) {
   closeWikiSheet();
 
   const isLast = state.round >= MAX_ROUNDS;
-  document.getElementById('r-next-btn').textContent = isLast ? 'סיום המשחק ★' : 'סיבוב הבא ▶';
+  document.getElementById('r-next-btn').innerHTML = isLast ? 'סיום המשחק <span aria-hidden="true">★</span>' : 'סיבוב הבא <span aria-hidden="true">▶</span>';
   document.getElementById('r-next-btn').disabled = true;
 
   showScreen('screen-result');
@@ -1374,7 +1373,7 @@ function renderResultTiles(containerId, tiles, word, tileClass) {
   tiles.forEach((letter, i) => {
     const d = document.createElement('div');
     d.className = `rt ${tileClass} ${usedIndices.has(i) ? 'rt-used' : 'rt-unused'}`;
-    d.textContent = letter === '★' ? '★' : letter;
+    d.textContent = letter;
     container.appendChild(d);
   });
 }

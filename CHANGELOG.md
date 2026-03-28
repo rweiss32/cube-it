@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.8] 2026-03-28 — fix: replace innerHTML with safe DOM construction
+
+- Replaced innerHTML in suggestions and game-over score with DOM API calls
+- Eliminates potential XSS if word data or CPU name ever contains HTML characters
+
 ## [0.23.7] 2026-03-28 — fix: focus management for joker modal and bottom sheets
 
 - Joker modal now focuses the first letter button on open and restores focus to the submit button on close

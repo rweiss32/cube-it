@@ -540,7 +540,7 @@
 </div>
 
 <script>
-const VERSION = '0.23.7';
+const VERSION = '0.23.8';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1284,7 +1284,14 @@ async function endRound(playerWord, warning) {
   if (!pw) {
     const sugs = getSuggestions(state.playerTiles, state.currentCatKey);
     if (sugs.length > 0) {
-      suggestEl.innerHTML = '💡 יכולת לשחק: ' + sugs.map(w => `<strong>${finalForm(w)}</strong>`).join(' או ');
+      suggestEl.textContent = '';
+      suggestEl.append('💡 יכולת לשחק: ');
+      sugs.forEach((w, i) => {
+        if (i > 0) suggestEl.append(' או ');
+        const strong = document.createElement('strong');
+        strong.textContent = finalForm(w);
+        suggestEl.appendChild(strong);
+      });
       suggestEl.style.display = 'block';
     } else {
       suggestEl.style.display = 'none';
@@ -1361,8 +1368,16 @@ function showGameOver() {
   else            { title = '🤝 תיקו!';                    soundStart(); }
 
   document.getElementById('go-title').textContent = title;
-  document.getElementById('go-score').innerHTML =
-    `ניקוד סופי: <span>אתה ${p}</span> — <span>${state.cpuName} ${c}</span>`;
+  const goScore = document.getElementById('go-score');
+  goScore.textContent = '';
+  goScore.append('ניקוד סופי: ');
+  const spanPlayer = document.createElement('span');
+  spanPlayer.textContent = `אתה ${p}`;
+  goScore.appendChild(spanPlayer);
+  goScore.append(' — ');
+  const spanCpu = document.createElement('span');
+  spanCpu.textContent = `${state.cpuName} ${c}`;
+  goScore.appendChild(spanCpu);
   showScreen('screen-gameover');
 }
 

@@ -380,7 +380,6 @@
     .cpu-name-inline  { font-size: .8rem; color: var(--text-muted); }
 
     /* ── CPU REACTION ── */
-    .cpu-reaction { min-height: 1.4em; font-size: 1rem; color: var(--text-muted); margin: 6px 0 2px; }
 
     /* ── INFO BOXES (suggestions / warning) ── */
     .info-box {
@@ -532,8 +531,6 @@
     </div>
   </div>
 
-  <div id="r-cpu-reaction" class="cpu-reaction"></div>
-
   <div id="r-suggestions" class="info-box"></div>
 
   <div id="r-warning" class="info-box info-box-warning"></div>
@@ -610,7 +607,7 @@
 </div>
 
 <script>
-const VERSION = '0.26.2';
+const VERSION = '0.26.3';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1290,17 +1287,6 @@ function updateCpuNameLabels() {
 //  ROUND END
 // ══════════════════════════════════════════════
 
-const CPU_REACTIONS = {
-  win:  ['קל מדי 😏', 'הבא! 😎', 'אני מנצח תמיד 😄', 'פשוט 🙂', 'עוד סיבוב? 😏'],
-  lose: ['כל הכבוד! 👏', 'הפתעת אותי 😲', 'הפעם שלך... 😤', 'ממש טוב! 👍', 'אוקי, הנקודה שלך 😅'],
-  tie:  ['שקול... 🤔', 'אותו דבר! 😐', 'אפשר להגיד תיקו 🤷', 'מעניין 🧐'],
-  none: ['לאף אחד לא היה מה להגיד 🤐'],
-};
-
-function randomReaction(outcome) {
-  const pool = CPU_REACTIONS[outcome];
-  return pool[Math.floor(Math.random() * pool.length)];
-}
 
 function typewriterReveal(el, word, delay, callback) {
   el.textContent = '';
@@ -1364,10 +1350,8 @@ async function endRound(playerWord, warning) {
   // CPU word starts hidden — show animated thinking dots
   const cpuWordEl  = document.getElementById('r-cpu-word');
   const cpuCountEl = document.getElementById('r-cpu-count');
-  const cpuReactionEl = document.getElementById('r-cpu-reaction');
   cpuWordEl.innerHTML = `<span class="thinking-dots"><span>•</span><span>•</span><span>•</span></span>`;
   cpuCountEl.textContent = `${state.cpuName} ${isCpuFemale() ? 'חושבת' : 'חושב'}`;
-  cpuReactionEl.textContent = '';
 
   renderResultTiles('r-player-tiles', state.playerTiles, pw, 'rt-player');
   document.getElementById('r-cpu-tiles').innerHTML = '';
@@ -1446,7 +1430,6 @@ async function endRound(playerWord, warning) {
       cpuWinnerEl.textContent    = 'תיקו';
       cpuWinnerEl.className      = 'winner-badge badge-tie';
     }
-    cpuReactionEl.textContent = randomReaction(outcome);
     document.getElementById('r-next-btn').disabled = false;
     if (settings.wiki && cw) {
       const cpuWikiWord = finalForm(cw);

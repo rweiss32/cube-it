@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.26.3] 2026-03-28 — remove CPU reaction text from result screen
+
+- Removed CPU reaction phrases (e.g. "קל מדי 😏", "כל הכבוד! 👏") from the result screen
+- Removed `CPU_REACTIONS` constant and `randomReaction` function entirely
+
 ## [0.26.2] 2026-03-28 — correct letter pool counts (62 tiles total)
 
 - Fixed letter pool: total reduced from 70 to 62 tiles to match the physical game

@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.17] 2026-03-28 — chore: project structure cleanup and README
+
+- Added README.md with project overview, local dev instructions, word list editing guide, and hooks setup
+- Fixed manifest.json: start_url changed to "/" and added purpose field to icons
+- Moved unused source assets (logo_heb.png, source jpeg) to design/ folder
+
 ## [0.23.16] 2026-03-28 — fix: sw.js skipWaiting and clients.claim inside waitUntil chains
 
 - `skipWaiting()` now runs only after `c.addAll(STATIC)` resolves — prevents a broken worker from activating if any cached asset fails to fetch on install

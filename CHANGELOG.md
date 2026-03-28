@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.12] 2026-03-28 — fix: gray out next-round button while CPU is thinking
+
+- Added `.btn-gold:disabled` CSS rule — button now appears grayed out (muted gradient, `opacity: 0.6`, `cursor: not-allowed`) while the CPU thinking animation plays
+- Button was already functionally disabled; this makes the disabled state visually obvious to the player
+
 ## [0.23.11] 2026-03-28 — chore: fix stale once-listener bug, aria roles, aria-hidden emojis, touch targets, inline styles, timer DOM caching, aria-pressed on tiles
 
 - Fixed stale `{ once: true }` click listener on settings and wiki sheet — pressing Escape no longer leaves a dangling listener that could close a freshly-reopened panel

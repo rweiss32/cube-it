@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.26.0] 2026-03-28 — move winner badge into result card and add confetti on win
+
+- Winner text ("ניצחת!" / "אבי ניצח") now appears inside the winner's card, above the word label, with colored pill background — top banner removed
+- Canvas confetti animation bursts on player win (120 particles, 3.5s, pointer-events: none)
+
 ## [0.25.1] 2026-03-28 — fix: clarify tiles label to mention drag-to-reorder
 
 - Updated tiles section label to "לחץ על אות כדי להוסיף למילה או גרור כדי לסדר:" — now mentions both tap and drag gestures

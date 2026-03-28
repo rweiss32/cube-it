@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.26.2] 2026-03-28 — correct letter pool counts (62 tiles total)
+
+- Fixed letter pool: total reduced from 70 to 62 tiles to match the physical game
+- Adjusted counts for א, ה, ו, י, ל, מ, ע, צ and others to correct values
+
 ## [0.26.1] 2026-03-28 — show category and score panes on result and gameover screens, matching game screen layout
 
 - Category (definition) pane now appears on result and gameover screens, identical to the game screen

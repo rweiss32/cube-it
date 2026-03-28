@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.16] 2026-03-28 — fix: sw.js skipWaiting and clients.claim inside waitUntil chains
+
+- `skipWaiting()` now runs only after `c.addAll(STATIC)` resolves — prevents a broken worker from activating if any cached asset fails to fetch on install
+- `clients.claim()` now runs only after old caches are fully deleted — prevents clients being claimed mid-cleanup
+
 ## [0.23.15] 2026-03-28 — fix: focus trap for joker modal and settings sheet
 
 - Added `trapFocus(container, e)` helper that constrains Tab/Shift+Tab cycling to focusable elements within a dialog

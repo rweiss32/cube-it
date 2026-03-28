@@ -108,6 +108,7 @@
       background: none; border: none; cursor: pointer;
       font-size: 1.3rem; color: var(--text-dim); padding: 4px;
       line-height: 1;
+      min-width: 44px; min-height: 44px;
     }
     #btn-settings:hover { color: var(--text); }
 
@@ -264,7 +265,7 @@
     #wiki-sheet-extract { font-size: 0.88rem; line-height: 1.6; margin-top: 6px; color: var(--text); }
 
     /* ── JOKER MODAL ── */
-#joker-modal {
+    #joker-modal {
       display: none;
       position: fixed; inset: 0; z-index: 500;
       background: var(--overlay);
@@ -280,7 +281,8 @@
       position: absolute; top: 10px; left: 14px;
       background: none; border: none; cursor: pointer;
       font-size: 1.1rem; color: var(--text-muted); line-height: 1;
-      padding: 4px 6px; border-radius: 6px;
+      padding: 10px 12px; border-radius: 6px;
+      min-width: 44px; min-height: 44px;
     }
     #joker-close-btn:hover { color: var(--text); }
     .joker-box { position: relative; }
@@ -391,6 +393,14 @@
     .gameover-title { font-size: 3rem; font-weight: 900; margin-bottom: 8px; }
     .final-score { font-size: 1.4rem; color: var(--text-muted); }
     .final-score span { color: #ffd200; font-weight: 700; }
+    .btn-replay { margin-top: 12px; }
+
+    /* ── HEADER INNER ── */
+    .header-inner { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+    /* ── WIKI SHEET HEADER ── */
+    .wiki-sheet-header { position: relative; text-align: center; margin-bottom: 6px; }
+    .wiki-source-label { position: absolute; right: 0; font-size: 0.75rem; color: var(--text-muted); }
 
   </style>
 </head>
@@ -398,7 +408,7 @@
 
 <!-- ══════════════ HEADER ══════════════ -->
 <header id="site-header">
-  <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+  <div class="header-inner">
     <img id="header-logo-img" src="assets/logo.png" alt="קוביאות" />
     <div class="header-subtitle">משחק מילים</div>
   </div>
@@ -429,12 +439,12 @@
 <!-- ══════════════ GAME ══════════════ -->
 <div id="screen-game" class="screen">
   <div class="score-bar">
-    <div>🧑 <span class="score-num" id="g-player-score">0</span></div>
+    <div><span aria-hidden="true">🧑</span> <span class="score-num" id="g-player-score">0</span></div>
     <div class="score-bar-center">
       <div class="round-label">סיבוב</div>
       <div class="score-bar-round" id="g-round">1 / 5</div>
     </div>
-    <div>🧑 <span class="cpu-name-label cpu-name-inline"></span> <span class="score-num" id="g-cpu-score">0</span></div>
+    <div><span aria-hidden="true">🧑</span> <span class="cpu-name-label cpu-name-inline"></span> <span class="score-num" id="g-cpu-score">0</span></div>
   </div>
 
   <div class="def-card">
@@ -473,13 +483,13 @@
 
   <div class="comparison">
     <div class="side-card">
-      <div class="side-label">🧑 המילה שלך</div>
+      <div class="side-label"><span aria-hidden="true">🧑</span> המילה שלך</div>
       <div class="side-word" id="r-player-word">—</div>
       <div class="side-count" id="r-player-count"></div>
       <div class="side-tiles" id="r-player-tiles"></div>
     </div>
     <div class="side-card">
-      <div class="side-label">🧑 המילה של <span class="cpu-name-label">—</span></div>
+      <div class="side-label"><span aria-hidden="true">🧑</span> המילה של <span class="cpu-name-label">—</span></div>
       <div class="side-word" id="r-cpu-word">—</div>
       <div class="side-count" id="r-cpu-count"></div>
       <div class="side-tiles" id="r-cpu-tiles"></div>
@@ -489,9 +499,9 @@
   <div id="r-cpu-reaction" class="cpu-reaction"></div>
 
   <div class="score-bar">
-    <div>🧑 <span class="score-num" id="r-player-score">0</span></div>
+    <div><span aria-hidden="true">🧑</span> <span class="score-num" id="r-player-score">0</span></div>
     <div class="score-bar-label">ניקוד</div>
-    <div>🧑 <span class="cpu-name-label cpu-name-inline"></span> <span class="score-num" id="r-cpu-score">0</span></div>
+    <div><span aria-hidden="true">🧑</span> <span class="cpu-name-label cpu-name-inline"></span> <span class="score-num" id="r-cpu-score">0</span></div>
   </div>
 
   <div id="r-suggestions" class="info-box"></div>
@@ -505,7 +515,7 @@
 <div id="screen-gameover" class="screen">
   <div class="gameover-title" id="go-title">—</div>
   <div class="final-score" id="go-score"></div>
-  <button class="btn btn-gold" style="margin-top:12px" onclick="startGame()">שחק שוב <span aria-hidden="true">↺</span></button>
+  <button class="btn btn-gold btn-replay" onclick="startGame()">שחק שוב <span aria-hidden="true">↺</span></button>
   <div class="cta-box cta-gameover">
     <div class="cta-text">
       <strong>🎲 אהבת? קנה את הגרסה המלאה!</strong>
@@ -516,10 +526,10 @@
 </div>
 
 <!-- ══════════════ JOKER MODAL ══════════════ -->
-<div id="joker-modal">
+<div id="joker-modal" role="dialog" aria-modal="true" aria-labelledby="joker-modal-title">
   <div class="joker-box">
     <button id="joker-close-btn" onclick="cancelJoker()" aria-label="סגור"><span aria-hidden="true">✕</span></button>
-    <h3>הג'וקר מייצג איזו אות?</h3>
+    <h3 id="joker-modal-title">הג'וקר מייצג איזו אות?</h3>
     <p id="joker-modal-subtitle"></p>
     <div class="joker-word-preview" id="joker-word-preview"></div>
     <div class="letter-grid" id="letter-grid"></div>
@@ -527,8 +537,8 @@
 </div>
 
 <!-- ══════════════ SETTINGS SHEET ══════════════ -->
-<div id="settings-sheet">
-  <div class="settings-title">⚙️ הגדרות</div>
+<div id="settings-sheet" role="dialog" aria-modal="true" aria-label="הגדרות">
+  <div class="settings-title"><span aria-hidden="true">⚙️</span> הגדרות</div>
   <div class="settings-row">
     <label class="toggle">
       <input type="checkbox" id="setting-sound" onchange="saveSetting('sound', this.checked)">
@@ -547,15 +557,15 @@
 
 <!-- ══════════════ WIKI BOTTOM SHEET ══════════════ -->
 <div id="wiki-sheet">
-  <div style="position:relative;text-align:center;margin-bottom:6px;">
-    <span style="position:absolute;right:0;font-size:0.75rem;color:var(--text-muted);">ויקיפדיה</span>
+  <div class="wiki-sheet-header">
+    <span class="wiki-source-label">ויקיפדיה</span>
     <span id="wiki-sheet-word"></span>
   </div>
   <div id="wiki-sheet-extract"></div>
 </div>
 
 <script>
-const VERSION = '0.23.10';
+const VERSION = '0.23.11';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -588,6 +598,7 @@ function onSettingsKey(e) {
 
 function closeSettings() {
   document.getElementById('settings-sheet').classList.remove('open');
+  document.removeEventListener('click', closeSettings);
   document.removeEventListener('keydown', onSettingsKey);
 }
 
@@ -792,14 +803,15 @@ function startTimer() {
   }, 1000);
 }
 
+const elTimer    = document.getElementById('g-timer');
+const elTimerBar = document.getElementById('g-timer-bar');
+
 function updateTimerUI() {
   const s = state.timerSecs;
-  const el = document.getElementById('g-timer');
-  const bar = document.getElementById('g-timer-bar');
-  el.textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-  el.className = 'timer' + (s <= 15 ? ' urgent' : '');
-  bar.style.width = (s / 120 * 100) + '%';
-  bar.style.background = s <= 15 ? '#ff6b6b' : '#4ecca3';
+  elTimer.textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  elTimer.className = 'timer' + (s <= 15 ? ' urgent' : '');
+  elTimerBar.style.width = (s / 120 * 100) + '%';
+  elTimerBar.style.background = s <= 15 ? '#ff6b6b' : '#4ecca3';
 }
 
 // ══════════════════════════════════════════════
@@ -815,6 +827,7 @@ function renderTiles() {
     btn.className = 'tile' + (letter === '★' ? ' joker' : '') + (isSelected ? ' selected used' : '');
     btn.textContent = letter;
     btn.dataset.tileIndex = i;
+    btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
     if (!isSelected) btn.onclick = () => selectTile(i);
     initTileDrag(btn, i);
     container.appendChild(btn);
@@ -1506,6 +1519,7 @@ function onWikiKey(e) {
 
 function closeWikiSheet() {
   document.getElementById('wiki-sheet').classList.remove('open');
+  document.removeEventListener('click', closeWikiSheet);
   document.removeEventListener('keydown', onWikiKey);
 }
 

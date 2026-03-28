@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.11] 2026-03-28 — chore: fix stale once-listener bug, aria roles, aria-hidden emojis, touch targets, inline styles, timer DOM caching, aria-pressed on tiles
+
+- Fixed stale `{ once: true }` click listener on settings and wiki sheet — pressing Escape no longer leaves a dangling listener that could close a freshly-reopened panel
+- Added `role="dialog"` + `aria-modal` to joker modal and settings sheet; `aria-pressed` on tile buttons; `aria-hidden` on all decorative 🧑/⚙️ emojis
+- Moved last three inline styles to CSS classes; cached `g-timer`/`g-timer-bar` at module level; enlarged touch targets for settings and joker-close buttons
+
 ## [0.23.10] 2026-03-28 — chore: minor code and accessibility polish
 
 - Added `noreferrer` to external purchase links

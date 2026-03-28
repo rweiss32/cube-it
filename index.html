@@ -496,6 +496,19 @@
 
 <!-- ══════════════ RESULT ══════════════ -->
 <div id="screen-result" class="screen">
+  <div class="score-bar">
+    <div><span aria-hidden="true">🧑</span> <span class="score-num" id="r-player-score">0</span></div>
+    <div class="score-bar-center">
+      <div class="round-label">סיבוב</div>
+      <div class="score-bar-round" id="r-round">1 / 5</div>
+    </div>
+    <div><span aria-hidden="true">🧑</span> <span class="cpu-name-label cpu-name-inline"></span> <span class="score-num" id="r-cpu-score">0</span></div>
+  </div>
+  <div class="def-card">
+    <div class="def-label">הגדרה</div>
+    <div class="def-text" id="r-def-text">—</div>
+    <div class="def-hint" id="r-def-hint"></div>
+  </div>
   <div class="comparison">
     <div class="side-card">
       <div class="winner-badge" id="r-player-winner"></div>
@@ -521,12 +534,6 @@
 
   <div id="r-cpu-reaction" class="cpu-reaction"></div>
 
-  <div class="score-bar">
-    <div><span aria-hidden="true">🧑</span> <span class="score-num" id="r-player-score">0</span></div>
-    <div class="score-bar-label">ניקוד</div>
-    <div><span aria-hidden="true">🧑</span> <span class="cpu-name-label cpu-name-inline"></span> <span class="score-num" id="r-cpu-score">0</span></div>
-  </div>
-
   <div id="r-suggestions" class="info-box"></div>
 
   <div id="r-warning" class="info-box info-box-warning"></div>
@@ -536,8 +543,20 @@
 
 <!-- ══════════════ GAME OVER ══════════════ -->
 <div id="screen-gameover" class="screen">
+  <div class="score-bar">
+    <div><span aria-hidden="true">🧑</span> <span class="score-num" id="go-player-score">0</span></div>
+    <div class="score-bar-center">
+      <div class="round-label">סיבוב</div>
+      <div class="score-bar-round" id="go-round">5 / 5</div>
+    </div>
+    <div><span aria-hidden="true">🧑</span> <span class="cpu-name-label cpu-name-inline"></span> <span class="score-num" id="go-cpu-score">0</span></div>
+  </div>
+  <div class="def-card">
+    <div class="def-label">הגדרה</div>
+    <div class="def-text" id="go-def-text">—</div>
+    <div class="def-hint" id="go-def-hint"></div>
+  </div>
   <div class="gameover-title" id="go-title">—</div>
-  <div class="final-score" id="go-score"></div>
   <button class="btn btn-gold btn-replay" onclick="startGame()">שחק שוב <span aria-hidden="true">↺</span></button>
   <div class="cta-box cta-gameover">
     <div class="cta-text">
@@ -591,7 +610,7 @@
 </div>
 
 <script>
-const VERSION = '0.26.0';
+const VERSION = '0.26.1';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1340,6 +1359,7 @@ async function endRound(playerWord, warning) {
   document.getElementById('r-player-count').textContent = pw ? `${pLen} אותיות` : '';
   document.getElementById('r-player-score').textContent = prevPlayerScore;
   document.getElementById('r-cpu-score').textContent    = prevCpuScore;
+  document.getElementById('r-round').textContent        = `${state.round} / ${MAX_ROUNDS}`;
 
   // CPU word starts hidden — show animated thinking dots
   const cpuWordEl  = document.getElementById('r-cpu-word');
@@ -1393,6 +1413,8 @@ async function endRound(playerWord, warning) {
   document.getElementById('r-next-btn').innerHTML = isLast ? 'סיום המשחק <span aria-hidden="true">★</span>' : 'סיבוב הבא <span aria-hidden="true">▶</span>';
   document.getElementById('r-next-btn').disabled = true;
 
+  document.getElementById('r-def-text').textContent = state.currentCatKey;
+  document.getElementById('r-def-hint').textContent = CATEGORIES[state.currentCatKey].hint;
   showScreen('screen-result');
 
   // Thinking delay: 1.5–4s, longer for longer words
@@ -1473,17 +1495,12 @@ function showGameOver() {
   else if (c > p) { title = `😞 ${state.cpuName} ${isCpuFemale() ? 'ניצחה' : 'ניצח'}`;   soundLose(); }
   else            { title = '🤝 תיקו!';                    soundStart(); }
 
+  document.getElementById('go-def-text').textContent = state.currentCatKey;
+  document.getElementById('go-def-hint').textContent = CATEGORIES[state.currentCatKey].hint;
   document.getElementById('go-title').textContent = title;
-  const goScore = document.getElementById('go-score');
-  goScore.textContent = '';
-  goScore.append('ניקוד סופי: ');
-  const spanPlayer = document.createElement('span');
-  spanPlayer.textContent = `אתה ${p}`;
-  goScore.appendChild(spanPlayer);
-  goScore.append(' — ');
-  const spanCpu = document.createElement('span');
-  spanCpu.textContent = `${state.cpuName} ${c}`;
-  goScore.appendChild(spanCpu);
+  document.getElementById('go-player-score').textContent = p;
+  document.getElementById('go-cpu-score').textContent    = c;
+  document.getElementById('go-round').textContent        = `${MAX_ROUNDS} / ${MAX_ROUNDS}`;
   showScreen('screen-gameover');
 }
 

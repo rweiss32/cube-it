@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.26.1] 2026-03-28 — show category and score panes on result and gameover screens, matching game screen layout
+
+- Category (definition) pane now appears on result and gameover screens, identical to the game screen
+- Score bar on result and gameover screens matches game screen exactly: player score, "סיבוב X / Y" center, CPU score
+- Gameover screen replaced plain final-score text with the shared score-bar component
+
 ## [0.26.0] 2026-03-28 — move winner badge into result card and add confetti on win
 
 - Winner text ("ניצחת!" / "אבי ניצח") now appears inside the winner's card, above the word label, with colored pill background — top banner removed

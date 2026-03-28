@@ -403,6 +403,20 @@
     .wiki-sheet-header { position: relative; text-align: center; margin-bottom: 6px; }
     .wiki-source-label { position: absolute; right: 0; font-size: 0.75rem; color: var(--text-muted); }
 
+    /* ── COMPACT LAYOUT for short viewports (phones with browser chrome) ── */
+    @media (max-height: 800px) {
+      .screen.active          { gap: 8px; }
+      .score-bar              { padding: 7px 16px; }
+      .def-card               { padding: 14px 24px; }
+      .def-text               { font-size: 2.2rem; }
+      .def-hint               { font-size: 0.85rem; margin-top: 4px; }
+      .timer                  { font-size: 1.9rem; }
+      .word-builder           { padding: 10px; }
+      .word-preview           { min-height: 52px; padding: 6px 10px; margin-bottom: 6px; }
+      .word-tile              { width: 46px; height: 46px; font-size: 1.3rem; }
+      .error-msg, .checking-msg { min-height: 16px; font-size: 0.82rem; }
+    }
+
   </style>
 </head>
 <body>
@@ -566,7 +580,7 @@
 </div>
 
 <script>
-const VERSION = '0.23.12';
+const VERSION = '0.23.13';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════

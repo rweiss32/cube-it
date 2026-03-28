@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.13] 2026-03-28 — fix: compact game screen on short-viewport phones
+
+- Added `@media (max-height: 800px)` breakpoint that reduces gaps, card padding, font sizes, and word-preview height
+- Fixes "שלח מילה" button being clipped on phones with tall browser chrome (e.g. OnePlus 12)
+
 ## [0.23.12] 2026-03-28 — fix: gray out next-round button while CPU is thinking
 
 - Added `.btn-gold:disabled` CSS rule — button now appears grayed out (muted gradient, `opacity: 0.6`, `cursor: not-allowed`) while the CPU thinking animation plays

@@ -540,7 +540,7 @@
 </div>
 
 <script>
-const VERSION = '0.23.6';
+const VERSION = '0.23.7';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -561,11 +561,19 @@ function openSettings() {
   document.getElementById('setting-sound').checked = settings.sound;
   document.getElementById('setting-wiki').checked  = settings.wiki;
   document.getElementById('settings-sheet').classList.add('open');
-  setTimeout(() => document.addEventListener('click', closeSettings, { once: true }), 0);
+  setTimeout(() => {
+    document.addEventListener('click', closeSettings, { once: true });
+    document.addEventListener('keydown', onSettingsKey);
+  }, 0);
+}
+
+function onSettingsKey(e) {
+  if (e.key === 'Escape') closeSettings();
 }
 
 function closeSettings() {
   document.getElementById('settings-sheet').classList.remove('open');
+  document.removeEventListener('keydown', onSettingsKey);
 }
 
 function syncBodyPadding() {
@@ -1028,9 +1036,15 @@ const HE_LETTERS = ['א','ב','ג','ד','ה','ו','ז','ח','ט','י','כ','ל',
 // Returns a Promise that resolves with the chosen letter, or null if cancelled
 let _jokerResolve = null;
 
+function onJokerKey(e) {
+  if (e.key === 'Escape') { document.removeEventListener('keydown', onJokerKey); cancelJoker(); }
+}
+
 function cancelJoker() {
   if (_jokerResolve) { _jokerResolve(null); _jokerResolve = null; }
+  document.removeEventListener('keydown', onJokerKey);
   document.getElementById('joker-modal').classList.remove('open');
+  document.getElementById('btn-submit')?.focus();
 }
 
 function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPositions = []) {
@@ -1070,6 +1084,7 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
       btn.textContent = letter;
       btn.onclick = () => {
         if (onOutside) { modal.removeEventListener('click', onOutside); onOutside = null; }
+        document.removeEventListener('keydown', onJokerKey);
         _jokerResolve = null;
         modal.classList.remove('open');
         resolve(letter);
@@ -1078,8 +1093,10 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
     });
 
     modal.classList.add('open');
+    modal.querySelector('.letter-pick-btn')?.focus();
+    document.addEventListener('keydown', onJokerKey);
 
-    // Click outside to cancel
+    // Click outside or Escape to cancel
     setTimeout(() => {
       onOutside = function(e) {
         if (!e.target.closest('.joker-box')) {
@@ -1440,11 +1457,19 @@ function showWikiSheet(word, extract) {
   document.getElementById('wiki-sheet-word').textContent = word;
   document.getElementById('wiki-sheet-extract').textContent = extract;
   document.getElementById('wiki-sheet').classList.add('open');
-  setTimeout(() => document.addEventListener('click', closeWikiSheet, { once: true }), 0);
+  setTimeout(() => {
+    document.addEventListener('click', closeWikiSheet, { once: true });
+    document.addEventListener('keydown', onWikiKey);
+  }, 0);
+}
+
+function onWikiKey(e) {
+  if (e.key === 'Escape') closeWikiSheet();
 }
 
 function closeWikiSheet() {
   document.getElementById('wiki-sheet').classList.remove('open');
+  document.removeEventListener('keydown', onWikiKey);
 }
 
 // ── INIT ──────────────────────────────────────

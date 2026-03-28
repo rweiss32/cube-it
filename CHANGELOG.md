@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.7] 2026-03-28 — fix: focus management for joker modal and bottom sheets
+
+- Joker modal now focuses the first letter button on open and restores focus to the submit button on close
+- Escape key closes the joker modal, settings sheet, and Wikipedia sheet
+- Keydown listeners are properly cleaned up when each panel closes
+
 ## [0.23.6] 2026-03-28 — fix: timer bar width on narrow screens
 
 - Changed `.timer-bar-bg` from fixed `300px` to `100%` to prevent horizontal overflow on small devices

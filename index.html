@@ -363,7 +363,10 @@
       flex: 1; background: var(--bg-card); border-radius: 14px; padding: 16px; text-align: center;
     }
     .side-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .side-word-container { display: flex; align-items: center; justify-content: center; gap: 6px; }
     .side-word { font-size: 2rem; font-weight: 700; min-height: 44px; }
+    .wiki-icon-btn { background: none; border: 1.5px solid var(--text-muted); border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px 0 0 0; flex-shrink: 0; font-family: serif; }
+    .wiki-icon-btn:hover { color: var(--text); border-color: var(--text); }
     .side-count { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
     .side-tiles { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
     .rt { width: 42px; height: 42px; border-radius: 6px; display: flex; align-items: center;
@@ -501,13 +504,19 @@
   <div class="comparison">
     <div class="side-card">
       <div class="side-label"><span aria-hidden="true">🧑</span> המילה שלך</div>
-      <div class="side-word" id="r-player-word">—</div>
+      <div class="side-word-container">
+        <div class="side-word" id="r-player-word">—</div>
+        <button class="wiki-icon-btn" id="r-player-wiki-btn" aria-label="ויקיפדיה" style="display:none">W</button>
+      </div>
       <div class="side-count" id="r-player-count"></div>
       <div class="side-tiles" id="r-player-tiles"></div>
     </div>
     <div class="side-card">
       <div class="side-label"><span aria-hidden="true">🧑</span> המילה של <span class="cpu-name-label">—</span></div>
-      <div class="side-word" id="r-cpu-word">—</div>
+      <div class="side-word-container">
+        <div class="side-word" id="r-cpu-word">—</div>
+        <button class="wiki-icon-btn" id="r-cpu-wiki-btn" aria-label="ויקיפדיה" style="display:none">W</button>
+      </div>
       <div class="side-count" id="r-cpu-count"></div>
       <div class="side-tiles" id="r-cpu-tiles"></div>
     </div>
@@ -582,7 +591,7 @@
 </div>
 
 <script>
-const VERSION = '0.24.0';
+const VERSION = '0.25.0';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1300,7 +1309,8 @@ function getSuggestions(tiles, catKey) {
 
 async function endRound(playerWord, warning) {
   const pw = norm(playerWord || '');
-  const wikiPromise = pw ? fetchWikiSummary(finalForm(pw)) : Promise.resolve(null);
+  const playerWikiWord = pw ? finalForm(pw) : null;
+  const wikiPromise = playerWikiWord ? fetchWikiSummary(playerWikiWord) : Promise.resolve(null);
   const cw = cpuBestWord(state.cpuTiles, state.currentCatKey);
 
   const pLen = pw.length;
@@ -1368,6 +1378,18 @@ async function endRound(playerWord, warning) {
   if (warning) { warnEl.textContent = '⚠️ ' + warning; warnEl.classList.add('visible'); }
   else { warnEl.textContent = ''; warnEl.classList.remove('visible'); }
   closeWikiSheet();
+  document.getElementById('r-player-wiki-btn').style.display = 'none';
+  document.getElementById('r-cpu-wiki-btn').style.display = 'none';
+
+  if (settings.wiki && playerWikiWord) {
+    wikiPromise.then(extract => {
+      if (extract) {
+        const btn = document.getElementById('r-player-wiki-btn');
+        btn.style.display = '';
+        btn.onclick = (e) => { e.stopPropagation(); showWikiSheet(playerWikiWord, extract); };
+      }
+    });
+  }
 
   const isLast = state.round >= MAX_ROUNDS;
   document.getElementById('r-next-btn').innerHTML = isLast ? 'סיום המשחק <span aria-hidden="true">★</span>' : 'סיבוב הבא <span aria-hidden="true">▶</span>';
@@ -1393,7 +1415,16 @@ async function endRound(playerWord, warning) {
     bannerEl.className   = bannerClasses[outcome];
     cpuReactionEl.textContent = randomReaction(outcome);
     document.getElementById('r-next-btn').disabled = false;
-    if (pw) wikiPromise.then(extract => { if (extract) showWikiSheet(finalForm(pw), extract); });
+    if (settings.wiki && cw) {
+      const cpuWikiWord = finalForm(cw);
+      fetchWikiSummary(cpuWikiWord).then(extract => {
+        if (extract) {
+          const btn = document.getElementById('r-cpu-wiki-btn');
+          btn.style.display = '';
+          btn.onclick = (e) => { e.stopPropagation(); showWikiSheet(cpuWikiWord, extract); };
+        }
+      });
+    }
   });
 }
 
@@ -1532,7 +1563,8 @@ async function fetchWikiSummary(word) {
 }
 
 function showWikiSheet(word, extract) {
-  if (!settings.wiki) return;
+  document.removeEventListener('click', closeWikiSheet);
+  document.removeEventListener('keydown', onWikiKey);
   document.getElementById('wiki-sheet-word').textContent = word;
   document.getElementById('wiki-sheet-extract').textContent = extract;
   document.getElementById('wiki-sheet').classList.add('open');

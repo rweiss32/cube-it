@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.25.0] 2026-03-28 — replace auto Wikipedia popup with clickable W icon next to each word
+
+- Wikipedia no longer auto-pops after a round; a circled serif W button appears next to each word when a Wikipedia article exists
+- Button appears for both the player's word and the CPU's word independently
+- Fixed re-open bug: button click no longer bubbles to the document close-listener; stale listeners are cleaned up on each open
+
 ## [0.24.0] 2026-03-28 — expand all category word lists to 200+ words
 
 - Expanded every category in `data/categories.txt` to at least 200 words

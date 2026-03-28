@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.23.14] 2026-03-28 — chore: settings checkbox a11y, tile size in compact layout, merge duplicate CSS, visible class for info boxes, aria-hidden emojis, DOM caching in render loop
+
+- Fixed settings toggles missing accessible names (`aria-label` on each checkbox); added `.tile` to compact breakpoint so 8 tiles fit in one row on phones; merged duplicate `.joker-box` CSS rule
+- Replaced `style.display` mutations on info boxes with a `.visible` CSS class; wrapped `🎲` emojis in `aria-hidden`; removed redundant keydown listener removal in `onJokerKey`
+- Cached `g-tiles` and `g-word-preview` DOM refs in `renderTiles` and passed to `initTileDrag` to avoid 16 `getElementById` calls per render
+
 ## [0.23.13] 2026-03-28 — fix: compact game screen on short-viewport phones
 
 - Added `@media (max-height: 800px)` breakpoint that reduces gaps, card padding, font sizes, and word-preview height

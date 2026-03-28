@@ -277,6 +277,7 @@
       background: var(--joker-box-bg); border-radius: 18px;
       padding: 28px 24px; max-width: 420px; width: 90%;
       text-align: center; border: 2px solid #8048d0;
+      position: relative;
     }
     #joker-close-btn {
       position: absolute; top: 10px; left: 14px;
@@ -286,7 +287,6 @@
       min-width: 44px; min-height: 44px;
     }
     #joker-close-btn:hover { color: var(--text); }
-    .joker-box { position: relative; }
     .joker-box h3 { font-size: 1.2rem; color: #f7971e; margin-bottom: 4px; }
     .joker-box p  { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px; }
     .joker-word-preview {
@@ -387,6 +387,7 @@
       margin: 10px auto; max-width: 360px; padding: 8px 14px;
       border-radius: 8px; background: var(--bg-card); font-size: 0.9rem; display: none;
     }
+    .info-box.visible { display: block; }
     .info-box-warning { color: #b8860b; }
 
     /* ── GAME OVER ── */
@@ -411,6 +412,7 @@
       .def-text               { font-size: 2.2rem; }
       .def-hint               { font-size: 0.85rem; margin-top: 4px; }
       .timer                  { font-size: 1.9rem; }
+      .tile                   { width: 48px; height: 48px; font-size: 1.4rem; }
       .word-builder           { padding: 10px; }
       .word-preview           { min-height: 52px; padding: 6px 10px; margin-bottom: 6px; }
       .word-tile              { width: 46px; height: 46px; font-size: 1.3rem; }
@@ -444,7 +446,7 @@
   <button class="btn btn-gold" onclick="startGame()">התחל משחק <span aria-hidden="true">▶</span></button>
   <div class="cta-box">
     <div class="cta-text">
-      <strong>🎲 רוצה את המשחק המלא?</strong>
+      <strong><span aria-hidden="true">🎲</span> רוצה את המשחק המלא?</strong>
       המשחק הפיזי כולל 62 קוביות, 40 קלפי הגדרה ו-3 סגנונות משחק
     </div>
     <a class="btn-cta" href="https://www.cube-it.co.il/" target="_blank" rel="noopener noreferrer">לרכישה ←</a>
@@ -523,7 +525,7 @@
 
   <div id="r-warning" class="info-box info-box-warning"></div>
 
-<button class="btn btn-gold" id="r-next-btn" onclick="soundClick();nextRound()">סיבוב הבא ▶</button>
+<button class="btn btn-gold" id="r-next-btn" onclick="soundClick();nextRound()">סיבוב הבא <span aria-hidden="true">▶</span></button>
 </div>
 
 <!-- ══════════════ GAME OVER ══════════════ -->
@@ -533,7 +535,7 @@
   <button class="btn btn-gold btn-replay" onclick="startGame()">שחק שוב <span aria-hidden="true">↺</span></button>
   <div class="cta-box cta-gameover">
     <div class="cta-text">
-      <strong>🎲 אהבת? קנה את הגרסה המלאה!</strong>
+      <strong><span aria-hidden="true">🎲</span> אהבת? קנה את הגרסה המלאה!</strong>
       המשחק הפיזי של קוביאות כולל 62 קוביות, 40 קלפי הגדרה, 3 סגנונות משחק ועד 4 שחקנים
     </div>
     <a class="btn-cta" href="https://www.cube-it.co.il/" target="_blank" rel="noopener noreferrer">לרכישה באתר ←</a>
@@ -556,14 +558,14 @@
   <div class="settings-title"><span aria-hidden="true">⚙️</span> הגדרות</div>
   <div class="settings-row">
     <label class="toggle">
-      <input type="checkbox" id="setting-sound" onchange="saveSetting('sound', this.checked)">
+      <input type="checkbox" id="setting-sound" aria-label="צלילים" onchange="saveSetting('sound', this.checked)">
       <span class="toggle-slider"></span>
     </label>
     <span class="settings-label">צלילים</span>
   </div>
   <div class="settings-row">
     <label class="toggle">
-      <input type="checkbox" id="setting-wiki" onchange="saveSetting('wiki', this.checked)">
+      <input type="checkbox" id="setting-wiki" aria-label="חלון ויקיפדיה" onchange="saveSetting('wiki', this.checked)">
       <span class="toggle-slider"></span>
     </label>
     <span class="settings-label">חלון ויקיפדיה</span>
@@ -580,7 +582,7 @@
 </div>
 
 <script>
-const VERSION = '0.23.13';
+const VERSION = '0.23.14';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -835,6 +837,7 @@ function updateTimerUI() {
 
 function renderTiles() {
   const container = document.getElementById('g-tiles');
+  const wordPreviewEl = document.getElementById('g-word-preview');
   container.innerHTML = '';
   state.playerTiles.forEach((letter, i) => {
     const btn = document.createElement('button');
@@ -844,14 +847,14 @@ function renderTiles() {
     btn.dataset.tileIndex = i;
     btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
     if (!isSelected) btn.onclick = () => selectTile(i);
-    initTileDrag(btn, i);
+    initTileDrag(btn, i, container, wordPreviewEl);
     container.appendChild(btn);
   });
 }
 
 // ── TILE DRAG-TO-REORDER ──────────────────────────────────────────────────
 
-function initTileDrag(btn, i) {
+function initTileDrag(btn, i, tilesContainer, wordPreviewEl) {
   let pressTimer   = null;
   let dragging     = false;
   let clone        = null;
@@ -860,9 +863,6 @@ function initTileDrag(btn, i) {
   let shiftPx      = 0;
   let lastX        = 0, lastY = 0;
   let overWordArea = false;
-
-  const tilesContainer = document.getElementById('g-tiles');
-  const wordPreviewEl  = document.getElementById('g-word-preview');
   let cachedTileEls = null;
 
   function getTileShift() {
@@ -1087,7 +1087,7 @@ const HE_LETTERS = ['א','ב','ג','ד','ה','ו','ז','ח','ט','י','כ','ל',
 let _jokerResolve = null;
 
 function onJokerKey(e) {
-  if (e.key === 'Escape') { document.removeEventListener('keydown', onJokerKey); cancelJoker(); }
+  if (e.key === 'Escape') cancelJoker();
 }
 
 function cancelJoker() {
@@ -1342,17 +1342,17 @@ async function endRound(playerWord, warning) {
         strong.textContent = finalForm(w);
         suggestEl.appendChild(strong);
       });
-      suggestEl.style.display = 'block';
+      suggestEl.classList.add('visible');
     } else {
-      suggestEl.style.display = 'none';
+      suggestEl.classList.remove('visible');
     }
   } else {
-    suggestEl.style.display = 'none';
+    suggestEl.classList.remove('visible');
   }
 
   const warnEl = document.getElementById('r-warning');
-  if (warning) { warnEl.textContent = '⚠️ ' + warning; warnEl.style.display = 'block'; }
-  else { warnEl.textContent = ''; warnEl.style.display = 'none'; }
+  if (warning) { warnEl.textContent = '⚠️ ' + warning; warnEl.classList.add('visible'); }
+  else { warnEl.textContent = ''; warnEl.classList.remove('visible'); }
   closeWikiSheet();
 
   const isLast = state.round >= MAX_ROUNDS;

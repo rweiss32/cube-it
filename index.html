@@ -202,9 +202,29 @@
                  transition: width 1s linear, background 1s; width: 100%; }
 
     /* ── TILES ── */
-    .tiles-section { width: 100%; }
-    .tiles-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
-    .tiles-row { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: center; }
+    .tiles-section {
+      width: 100%;
+      padding: 0;
+      position: relative;
+    }
+    .tiles-section::after {
+      content: '';
+      display: block;
+      height: 30px;
+      width: min(522px, 100%);
+      background: linear-gradient(to bottom, #d4a96a 0%, #b8844a 60%, #9a6830 100%);
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 8px 0 #6b3e18, 0 8px 16px rgba(0,0,0,0.28);
+      margin: -24px auto 0;
+    }
+    @media (prefers-color-scheme: dark) {
+      .tiles-section::after {
+        background: linear-gradient(to bottom, #6b4422 0%, #4a2e14 60%, #321e0a 100%);
+        box-shadow: 0 7px 0 #1a0e05, 0 8px 16px rgba(0,0,0,0.5);
+      }
+    }
+    .tiles-label { font-size: 0.8rem; color: rgba(255,255,255,0.75); margin-bottom: 8px; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+    .tiles-row { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: center; position: relative; z-index: 1; }
     #g-tiles.tiles-dragging .tile { transition: transform 0.15s ease; }
     #g-word-preview.drop-target { outline: 2px dashed #4ecca3; border-radius: 8px; background: rgba(78,204,163,0.08); }
     .tile {
@@ -516,9 +536,9 @@
   <div class="tiles-section">
     <div class="tiles-label">לחץ על אות כדי להוסיף למילה, לחיצה ארוכה כדי לגרור ולסדר מחדש:</div>
     <div class="tiles-row" id="g-tiles"></div>
-    <div class="space-btn-row">
-      <button class="btn-space" id="btn-space" onclick="insertSpace()" disabled aria-label="רווח"></button>
-    </div>
+  </div>
+  <div class="space-btn-row">
+    <button class="btn-space" id="btn-space" onclick="insertSpace()" disabled aria-label="רווח"></button>
   </div>
 
   <div class="word-builder">

@@ -204,12 +204,16 @@
     /* ── TILES ── */
     .tiles-section { width: 100%; }
     .tiles-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
-    .tiles-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tiles-row { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: center; }
     #g-tiles.tiles-dragging .tile { transition: transform 0.15s ease; }
     #g-word-preview.drop-target { outline: 2px dashed #4ecca3; border-radius: 8px; background: rgba(78,204,163,0.08); }
     .tile {
-      width: 58px; height: 58px; background: #f5e6c8; color: #2a1a00;
-      border-radius: 8px; border: none; font-size: 1.7rem; font-weight: 700;
+      width: min(58px, calc((100vw - 42px) / 8));
+      height: min(58px, calc((100vw - 42px) / 8));
+      background: #f5e6c8; color: #2a1a00;
+      border-radius: 8px; border: none;
+      font-size: min(1.7rem, calc((100vw - 42px) / 8 * 0.47));
+      font-weight: 700;
       user-select: none; -webkit-user-select: none;
       cursor: pointer; font-family: inherit;
       box-shadow: 0 4px 0 #8b6914;
@@ -222,10 +226,10 @@
     .tile.used { background: var(--tile-used-bg); color: var(--tile-used-color); cursor: default; box-shadow: 0 2px 0 var(--tile-used-shadow); }
     .tile.joker { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
     .tile.joker.selected { background: #4ecca3; }
-    .space-btn-row { margin-top: 8px; }
+    .space-btn-row { margin-top: 8px; display: flex; justify-content: center; }
     .btn-space {
-      height: 42px; padding: 0 28px;
-      background: #d6e4f0; color: #2a1a00;
+      height: 42px; width: min(220px, 60%);
+      background: #d6e4f0;
       border-radius: 8px; border: none;
       font-family: inherit; font-size: 0;
       user-select: none; -webkit-user-select: none;
@@ -234,12 +238,11 @@
       transition: transform .1s, box-shadow .1s, background .1s;
       position: relative;
     }
-    /* spacebar bar */
     .btn-space::after {
       content: ''; display: block;
-      width: 48px; height: 3px;
+      width: 60px; height: 3px;
       background: #7aa0bc; border-radius: 2px; opacity: 0.7;
-      position: absolute; bottom: 9px; left: 50%; transform: translateX(-50%);
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
     }
     .btn-space:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 7px 0 #7aa0bc; }
     .btn-space:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #7aa0bc; }
@@ -250,18 +253,25 @@
     .word-builder-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
     .word-preview {
       min-height: 66px; background: var(--bg-input); border-radius: 10px; padding: 8px 12px;
-      display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow-x: auto;
+      scrollbar-width: none; margin-bottom: 10px;
     }
+    .word-preview::-webkit-scrollbar { display: none; }
     .word-preview-empty { color: var(--text-muted); font-size: 0.9rem; align-self: center; }
     .word-tile {
-      width: 52px; height: 52px; background: #4ecca3; color: #0f1a1a;
-      border-radius: 7px; font-size: 1.5rem; font-weight: 700; font-family: inherit;
+      width: min(52px, calc((100vw - 104px) / 8.5));
+      height: min(52px, calc((100vw - 104px) / 8.5));
+      background: #4ecca3; color: #0f1a1a; flex-shrink: 0;
+      border-radius: 7px; font-size: min(1.5rem, calc((100vw - 104px) / 8.5 * 0.47));
+      font-weight: 700; font-family: inherit;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; border: none; transition: background .15s;
     }
     .word-tile:hover { background: #ff6b6b; color: #fff; }
     .word-tile-space {
-      width: 28px; height: 52px; display: inline-flex; align-items: center; justify-content: center;
+      width: min(28px, calc((100vw - 104px) / 17));
+      height: min(52px, calc((100vw - 104px) / 8.5));
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
       color: var(--text-muted); font-size: 1.1rem; cursor: pointer; border-radius: 7px;
       background: transparent; border: none; transition: background .15s, color .15s;
     }
@@ -504,7 +514,7 @@
   </div>
 
   <div class="tiles-section">
-    <div class="tiles-label">לחץ על אות או רווח כדי להוסיף למילה, לחיצה ארוכה כדי לגרור ולסדר מחדש:</div>
+    <div class="tiles-label">לחץ על אות כדי להוסיף למילה, לחיצה ארוכה כדי לגרור ולסדר מחדש:</div>
     <div class="tiles-row" id="g-tiles"></div>
     <div class="space-btn-row">
       <button class="btn-space" id="btn-space" onclick="insertSpace()" disabled aria-label="רווח"></button>
@@ -1436,6 +1446,7 @@ async function endRound(playerWord, warning) {
   cpuCountEl.textContent = `${state.cpuName} ${isCpuFemale() ? 'חושבת' : 'חושב'}`;
 
   renderResultTiles('r-player-tiles', state.playerTiles, pw, 'rt-player');
+
   document.getElementById('r-cpu-tiles').innerHTML = '';
 
   const suggestEl = document.getElementById('r-suggestions');

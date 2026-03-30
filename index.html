@@ -222,6 +222,15 @@
     .tile.used { background: var(--tile-used-bg); color: var(--tile-used-color); cursor: default; box-shadow: 0 2px 0 var(--tile-used-shadow); }
     .tile.joker { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
     .tile.joker.selected { background: #4ecca3; }
+    .space-btn-row { margin-top: 8px; }
+    .btn-space {
+      background: var(--bg-card); color: var(--text-muted);
+      border: 2px dashed #8b8b8b; border-radius: 8px;
+      padding: 7px 18px; font-size: 0.88rem; font-family: inherit;
+      cursor: pointer; transition: background .15s, border-color .15s, color .15s;
+    }
+    .btn-space:hover:not(:disabled) { background: var(--bg-input); border-color: #4ecca3; color: #4ecca3; }
+    .btn-space:disabled { opacity: 0.35; cursor: not-allowed; }
 
     /* ── WORD BUILDER ── */
     .word-builder { background: var(--bg-card); border-radius: 14px; padding: 16px; width: 100%; }
@@ -238,6 +247,12 @@
       cursor: pointer; border: none; transition: background .15s;
     }
     .word-tile:hover { background: #ff6b6b; color: #fff; }
+    .word-tile-space {
+      width: 28px; height: 52px; display: inline-flex; align-items: center; justify-content: center;
+      color: var(--text-muted); font-size: 1.1rem; cursor: pointer; border-radius: 7px;
+      background: transparent; border: none; transition: background .15s, color .15s;
+    }
+    .word-tile-space:hover { background: rgba(255,107,107,0.2); color: #ff6b6b; }
     .error-msg { color: #ff6b6b; font-size: 0.88rem; min-height: 20px; }
     .action-row { display: flex; gap: 10px; }
     .btn-submit { flex: 1; background: #4ecca3; color: #0a1a14; font-weight: 700;
@@ -301,6 +316,7 @@
     .jwt-normal { background: #f5e6c8; color: #2a1a00; }
     .jwt-joker  { background: #8048d0; color: #fff; animation: jokerpulse 1s infinite alternate; }
     .jwt-assigned { background: #4ecca3; color: #0a1a14; }
+    .jwt-space  { background: transparent; color: #8a8a8a; font-size: 0.9rem; min-width: 16px; }
     @keyframes jokerpulse { from { opacity:1; } to { opacity:.5; } }
     .letter-grid {
       display: grid; grid-template-columns: repeat(6, 1fr);
@@ -477,6 +493,9 @@
   <div class="tiles-section">
     <div class="tiles-label">לחץ על אות כדי להוסיף למילה, לחיצה ארוכה כדי לגרור ולסדר מחדש:</div>
     <div class="tiles-row" id="g-tiles"></div>
+    <div class="space-btn-row">
+      <button class="btn-space" id="btn-space" onclick="insertSpace()" disabled>רווח ␣</button>
+    </div>
   </div>
 
   <div class="word-builder">
@@ -757,7 +776,7 @@ function shuffle(arr) {
 }
 
 function canSpell(word, tiles) {
-  const letters = [...norm(word)];
+  const letters = [...norm(word)].filter(c => c !== ' ');
   if (letters.length < 2) return false;
   const avail = [...tiles];
   let jokersNeeded = 0;
@@ -771,8 +790,9 @@ function canSpell(word, tiles) {
 }
 
 function cpuBestWord(tiles, catKey) {
+  const letterCount = w => [...norm(w)].filter(c => c !== ' ').length;
   const words = shuffle(CATEGORIES[catKey]?.words || []);
-  const candidates = words.filter(w => canSpell(w, tiles)).sort((a, b) => b.length - a.length);
+  const candidates = words.filter(w => canSpell(w, tiles)).sort((a, b) => letterCount(b) - letterCount(a));
   if (candidates.length === 0) return '';
   // 25% chance: pick a random word from the top half instead of the best
   if (candidates.length > 1 && Math.random() < 0.25) {
@@ -804,14 +824,17 @@ function nextRound() {
 
   // Draw tiles — player hand: max 2 of any letter (including jokers)
   const pool = shuffle([...LETTER_POOL]);
-  const playerTiles = [];
-  const counts = {};
-  for (let i = 0; i < pool.length && playerTiles.length < 8; i++) {
-    const tile = pool[i];
-    if ((counts[tile] || 0) < 2) {
-      counts[tile] = (counts[tile] || 0) + 1;
-      playerTiles.push(tile);
-      pool.splice(i--, 1);
+  const debugParam = new URLSearchParams(location.search).get('tiles');
+  const playerTiles = debugParam ? [...debugParam].slice(0, 8) : [];
+  if (!debugParam) {
+    const counts = {};
+    for (let i = 0; i < pool.length && playerTiles.length < 8; i++) {
+      const tile = pool[i];
+      if ((counts[tile] || 0) < 2) {
+        counts[tile] = (counts[tile] || 0) + 1;
+        playerTiles.push(tile);
+        pool.splice(i--, 1);
+      }
     }
   }
   state.playerTiles = playerTiles;
@@ -823,7 +846,8 @@ function nextRound() {
   if (available.length === 0) { state.usedCatIndices = []; available = CARD_KEYS.map((_,i)=>i); }
   const pick = available[Math.floor(Math.random() * available.length)];
   state.usedCatIndices.push(pick);
-  state.currentCatKey = CARD_KEYS[pick];
+  state.currentCatKey = 
+  debugParam ? state.currentCatKey = 'מקום' : CARD_KEYS[pick]; // DEBUG case
 
   updateCpuNameLabels();
 
@@ -1058,16 +1082,27 @@ function renderWordPreview() {
   container.innerHTML = '';
   if (state.selectedIndices.length === 0) {
     container.innerHTML = '<span class="word-preview-empty">בחר אותיות למעלה...</span>';
+    updateSpaceBtn();
     return;
   }
   state.selectedIndices.forEach((tileIdx, wordPos) => {
-    const letter = state.playerTiles[tileIdx];
-    const btn = document.createElement('button');
-    btn.className = 'word-tile';
-    btn.textContent = letter;
-    btn.onclick = () => deselectTile(wordPos);
-    container.appendChild(btn);
+    if (tileIdx === 'SPACE') {
+      const btn = document.createElement('button');
+      btn.className = 'word-tile-space';
+      btn.textContent = '␣';
+      btn.title = 'לחץ להסרת הרווח';
+      btn.onclick = () => deselectTile(wordPos);
+      container.appendChild(btn);
+    } else {
+      const letter = state.playerTiles[tileIdx];
+      const btn = document.createElement('button');
+      btn.className = 'word-tile';
+      btn.textContent = letter;
+      btn.onclick = () => deselectTile(wordPos);
+      container.appendChild(btn);
+    }
   });
+  updateSpaceBtn();
 }
 
 function selectTile(i) {
@@ -1088,6 +1123,23 @@ function clearWord() {
   state.selectedIndices = [];
   renderTiles();
   renderWordPreview();
+}
+
+function insertSpace() {
+  const sel = state.selectedIndices;
+  if (sel.length === 0 || sel[sel.length - 1] === 'SPACE' || sel.includes('SPACE')) return;
+  soundClick();
+  sel.push('SPACE');
+  document.getElementById('g-error').textContent = '';
+  updateSpaceBtn();
+  renderWordPreview();
+}
+
+function updateSpaceBtn() {
+  const btn = document.getElementById('btn-space');
+  if (!btn) return;
+  const sel = state.selectedIndices;
+  btn.disabled = sel.length === 0 || sel[sel.length - 1] === 'SPACE' || sel.includes('SPACE');
 }
 
 // ══════════════════════════════════════════════
@@ -1150,7 +1202,10 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
     preview.innerHTML = '';
     tiles.forEach((letter, idx) => {
       const d = document.createElement('div');
-      if (idx === jokerWordPos) {
+      if (letter === ' ') {
+        d.className = 'joker-word-tile jwt-space';
+        d.textContent = '·';
+      } else if (idx === jokerWordPos) {
         d.className = 'joker-word-tile jwt-joker';
         d.textContent = '★';
       } else if (assignedPositions.includes(idx)) {
@@ -1224,17 +1279,25 @@ function setSubmitLocked(locked) {
 }
 
 async function submitWord() {
-  const rawTiles = state.selectedIndices.map(i => state.playerTiles[i]);
-  if (rawTiles.length < 2) {
+  const tileCount = state.selectedIndices.filter(i => i !== 'SPACE').length;
+  if (tileCount < 2) {
     document.getElementById('g-error').textContent = 'מילה חייבת להכיל לפחות 2 אותיות!';
     return;
   }
+  if (state.selectedIndices[state.selectedIndices.length - 1] === 'SPACE') {
+    document.getElementById('g-error').textContent = 'מילה לא יכולה להסתיים ברווח!';
+    return;
+  }
+
+  // Build raw tiles array (spaces are free — not drawn from the tile pool)
+  const rawTiles = state.selectedIndices.map(i => i === 'SPACE' ? ' ' : state.playerTiles[i]);
 
   // Resolve jokers first (if any)
   const hasJokers = rawTiles.includes('★');
   const resolvedTiles = hasJokers ? await resolveJokers(rawTiles) : rawTiles;
   if (resolvedTiles === null) return; // cancelled
-  const word = finalForm(resolvedTiles.join(''));
+  // Apply finalForm to each sub-word part (handles 2-word terms like בית ספר)
+  const word = resolvedTiles.join('').split(' ').map(finalForm).join(' ');
 
   document.getElementById('g-error').textContent = '';
 
@@ -1246,6 +1309,12 @@ async function submitWord() {
     soundSubmit();
     clearInterval(state.timerHandle);
     endRound(word);
+    return;
+  }
+
+  // Multi-word terms can't be validated via Wiktionary — must be in the category list
+  if (word.includes(' ')) {
+    document.getElementById('g-error').textContent = `"${word}" לא נמצאה ברשימה. נסה מילה אחרת!`;
     return;
   }
 
@@ -1314,12 +1383,12 @@ function getSuggestions(tiles, catKey) {
 
 async function endRound(playerWord, warning) {
   const pw = norm(playerWord || '');
-  const playerWikiWord = pw ? finalForm(pw) : null;
+  const playerWikiWord = pw ? pw.split(' ').map(finalForm).join(' ') : null;
   const wikiPromise = playerWikiWord ? fetchWikiSummary(playerWikiWord) : Promise.resolve(null);
   const cw = cpuBestWord(state.cpuTiles, state.currentCatKey);
 
-  const pLen = pw.length;
-  const cLen = cw.length;
+  const pLen = [...pw].filter(c => c !== ' ').length;
+  const cLen = [...norm(cw)].filter(c => c !== ' ').length;
 
   // Determine outcome (but don't update score yet — wait for reveal)
   let outcome;
@@ -1341,7 +1410,7 @@ async function endRound(playerWord, warning) {
   document.getElementById('r-player-winner').className   = 'winner-badge';
   document.getElementById('r-cpu-winner').textContent    = '';
   document.getElementById('r-cpu-winner').className      = 'winner-badge';
-  document.getElementById('r-player-word').textContent  = finalForm(pw) || '—';
+  document.getElementById('r-player-word').textContent  = pw ? pw.split(' ').map(finalForm).join(' ') : '—';
   document.getElementById('r-player-count').textContent = pw ? `${pLen} אותיות` : '';
   document.getElementById('r-player-score').textContent = prevPlayerScore;
   document.getElementById('r-cpu-score').textContent    = prevCpuScore;
@@ -1365,7 +1434,7 @@ async function endRound(playerWord, warning) {
       sugs.forEach((w, i) => {
         if (i > 0) suggestEl.append(' או ');
         const strong = document.createElement('strong');
-        strong.textContent = finalForm(w);
+        strong.textContent = norm(w).split(' ').map(finalForm).join(' ');
         suggestEl.appendChild(strong);
       });
       suggestEl.classList.add('visible');
@@ -1409,7 +1478,7 @@ async function endRound(playerWord, warning) {
   cpuCountEl.textContent = '';
 
   // Typewriter reveal of CPU word
-  const displayWord = finalForm(cw) || '—';
+  const displayWord = cw ? norm(cw).split(' ').map(finalForm).join(' ') : '—';
   typewriterReveal(cpuWordEl, displayWord, 120, () => {
     cpuCountEl.textContent = cw ? `${cLen} אותיות` : '';
     renderResultTiles('r-cpu-tiles', state.cpuTiles, cw, 'rt-cpu');
@@ -1432,7 +1501,7 @@ async function endRound(playerWord, warning) {
     }
     document.getElementById('r-next-btn').disabled = false;
     if (settings.wiki && cw) {
-      const cpuWikiWord = finalForm(cw);
+      const cpuWikiWord = norm(cw).split(' ').map(finalForm).join(' ');
       fetchWikiSummary(cpuWikiWord).then(extract => {
         if (extract) {
           const btn = document.getElementById('r-cpu-wiki-btn');
@@ -1451,6 +1520,7 @@ function renderResultTiles(containerId, tiles, word, tileClass) {
   const avail = [...tiles];
   const usedIndices = new Set();
   for (const ch of letters) {
+    if (ch === ' ') continue; // spaces don't consume tiles
     const idx = avail.findIndex((t, i) => t === ch && !usedIndices.has(i));
     if (idx !== -1) usedIndices.add(idx);
     else {

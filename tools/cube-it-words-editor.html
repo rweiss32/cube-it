@@ -152,7 +152,7 @@
     .word-chip .word-edit-input {
       background: white; border: 1px solid #4ecca3; border-radius: 10px;
       padding: 0 6px; font-size: 1rem; font-weight: 600; font-family: inherit;
-      direction: rtl; outline: none; width: 6em; color: #2a1a00;
+      direction: rtl; outline: none; width: 8em; color: #2a1a00;
     }
     .word-chip .remove-btn {
       background: none; border: none; cursor: pointer;
@@ -206,7 +206,7 @@
       <span class="empty-msg">בחר קטגוריה מהרשימה</span>
     </div>
     <div class="word-input-area" id="word-input-area" style="display:none">
-      <input type="text" id="word-input" placeholder="הקלד מילה אחת או מספר מילים מופרדות בפסיק (בית,כלב,ספר) ולחץ Enter..." autocomplete="off" spellcheck="false" />
+      <input type="text" id="word-input" placeholder="הקלד מילה (לדוגמה: בית ספר) או כמה מילים מופרדות בפסיק (בית,כלב,בית ספר) ולחץ Enter..." autocomplete="off" spellcheck="false" />
       <div id="word-error"></div>
     </div>
   </div>
@@ -239,7 +239,7 @@
 // ── Hebrew utils ──────────────────────────────────────────────────────────
 const FINAL_MAP  = {'\u05DD':'\u05DE','\u05DF':'\u05E0','\u05E3':'\u05E4','\u05DA':'\u05DB','\u05E5':'\u05E6'};
 const SUFFIX_MAP = {'\u05DE':'\u05DD','\u05E0':'\u05DF','\u05E4':'\u05E3','\u05DB':'\u05DA','\u05E6':'\u05E5'};
-const HEBREW_RE  = /^[\u05D0-\u05EA]+$/;
+const HEBREW_RE  = /^[\u05D0-\u05EA]+( [\u05D0-\u05EA]+)?$/;  // allows one internal space for 2-word terms
 
 function norm(w)      { return [...(w||'')].map(c => FINAL_MAP[c] ?? c).join('').trim(); }
 function finalForm(w) { if (!w) return w; const l = w[w.length-1]; return SUFFIX_MAP[l] ? w.slice(0,-1)+SUFFIX_MAP[l] : w; }
@@ -295,7 +295,7 @@ function parseCategories(text) {
       categories.push(current);
     } else if (current) {
       for (const w of line.split(',').map(w => w.trim()).filter(Boolean)) {
-        const word = finalForm(norm(w));
+        const word = norm(w).split(' ').map(finalForm).join(' ');
         const key  = norm(word);
         if (!current.seen.has(key)) { current.seen.add(key); current.words.push(word); }
       }
@@ -324,9 +324,12 @@ function serialize() {
 function validateWord(raw, cat) {
   const n = norm(raw);
   if (!n) return 'המילה ריקה';
-  if (!HEBREW_RE.test(n)) return 'אותיות עבריות בלבד';
-  if ([...n].length > 8) return `המילה ארוכה מדי — ${[...n].length} אותיות (מקסימום 8)`;
-  if (cat.seen.has(n)) return `"${finalForm(n)}" כבר קיימת בקטגוריה זו`;
+  if (!HEBREW_RE.test(n)) return 'אותיות עבריות בלבד (ניתן להוסיף רווח אחד בין שתי מילים)';
+  const parts = n.split(' ');
+  for (const part of parts) {
+    if ([...part].length > 8) return `חלק "${part}" ארוך מדי — ${[...part].length} אותיות (מקסימום 8 לכל חלק)`;
+  }
+  if (cat.seen.has(n)) return `"${n.split(' ').map(finalForm).join(' ')}" כבר קיימת בקטגוריה זו`;
   return null;
 }
 
@@ -482,7 +485,7 @@ function startEditWord(chip, oldWord, cat) {
       input.select();
       return;
     }
-    const newWord = finalForm(norm(raw));
+    const newWord = norm(raw).split(' ').map(finalForm).join(' ');
     const newKey  = norm(newWord);
     cat.words = cat.words.map(w => norm(w) === oldKey ? newWord : w);
     cat.seen.add(newKey);
@@ -588,7 +591,7 @@ document.getElementById('word-input').addEventListener('keydown', async e => {
   for (const raw of parts) {
     const msg = validateWord(raw, selectedCat);
     if (msg) { errors.push(`"${raw}": ${msg}`); continue; }
-    const word = finalForm(norm(raw));
+    const word = norm(raw).split(' ').map(finalForm).join(' ');
     selectedCat.seen.add(norm(word));
     selectedCat.words.push(word);
   }

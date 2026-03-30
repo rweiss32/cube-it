@@ -24,9 +24,9 @@
  *
  * Validation (applied in txt2js and merge):
  *   - Only Hebrew letters (א-ת, including final forms)
- *   - Max 8 letters per word
+ *   - Max 8 letters per word/part (2-word terms like "בית ספר" are allowed: each part ≤ 8 letters)
  *   - No duplicates within a category
- *   - No spaces, punctuation or foreign characters
+ *   - At most one internal space (for 2-word terms); no other punctuation or foreign characters
  */
 
 'use strict';
@@ -38,7 +38,7 @@ const ROOT         = path.join(__dirname, '..');
 const WORDS_TXT    = path.join(ROOT, 'data', 'categories.txt');
 const CATEGORIES_JS = path.join(ROOT, 'data', 'categories.js');
 
-const HEBREW_RE  = /^[\u05D0-\u05EA]+$/;  // alef–tav only (includes final forms)
+const HEBREW_RE  = /^[\u05D0-\u05EA]+( [\u05D0-\u05EA]+)?$/;  // alef–tav, optional single space for 2-word terms
 const FINAL_MAP  = { '\u05DD':'\u05DE','\u05DF':'\u05E0','\u05E3':'\u05E4','\u05DA':'\u05DB','\u05E5':'\u05E6' };
 const SUFFIX_MAP = { '\u05DE':'\u05DD','\u05E0':'\u05DF','\u05E4':'\u05E3','\u05DB':'\u05DA','\u05E6':'\u05E5' };
 
@@ -52,8 +52,12 @@ function validateWord(word, category, lineNum) {
   // validate against the normalised form (no final letters) so ארץ and ארצ both pass
   if (!HEBREW_RE.test(norm(word)))
     errors.push(`line ${lineNum}: "${word}" in [${category}] — non-Hebrew characters`);
-  if ([...norm(word)].length > 8)
-    errors.push(`line ${lineNum}: "${word}" in [${category}] — ${[...norm(word)].length} letters (max 8)`);
+  // each part of a 2-word term may have at most 8 letters
+  const parts = norm(word).split(' ');
+  for (const part of parts) {
+    if ([...part].length > 8)
+      errors.push(`line ${lineNum}: "${word}" in [${category}] — part "${part}" has ${[...part].length} letters (max 8 per part)`);
+  }
   return errors;
 }
 
@@ -125,7 +129,8 @@ function parseTxt(filePath, { ignoreDuplicates = false } = {}) {
 
     const words = line.split(',').map(w => w.trim()).filter(Boolean);
     for (const raw of words) {
-      const word = finalForm(raw);
+      // apply finalForm to each part (handles 2-word terms like בית ספר)
+      const word = raw.split(' ').map(finalForm).join(' ');
       const wordErrors = validateWord(word, current.category, lineNum);
       errors.push(...wordErrors);
       if (wordErrors.length > 0) continue;
@@ -156,7 +161,7 @@ function serializeTxt(categories) {
   ];
   for (const cat of categories) {
     lines.push(cat.description ? `# ${cat.category} | ${cat.description}` : `# ${cat.category}`);
-    const words = cat.words.map(finalForm);
+    const words = cat.words.map(w => w.split(' ').map(finalForm).join(' '));
     for (let i = 0; i < words.length; i += 8) lines.push(words.slice(i, i + 8).join(','));
     lines.push('');
   }

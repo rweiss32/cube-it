@@ -5,6 +5,9 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.27.1] 2026-03-30 — Put all cubes in the same line
+
+
 ## [0.27.0] 2026-03-30 — support 2-word terms (e.g. בית ספר) with a spacebar button in the tile tray
 
 - Added a blue spacebar button to the tile tray for inserting a space between two words

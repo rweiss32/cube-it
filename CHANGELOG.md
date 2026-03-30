@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.27.0] 2026-03-30 — support 2-word terms (e.g. בית ספר) with a spacebar button in the tile tray
+
+- Added a blue spacebar button to the tile tray for inserting a space between two words
+- 2-word terms (e.g. בית ספר) now supported in categories, validation, scoring, and result display
+- Updated word editor and convert tool to allow one internal space per word
+
 ## [0.26.3] 2026-03-28 — remove CPU reaction text from result screen
 
 - Removed CPU reaction phrases (e.g. "קל מדי 😏", "כל הכבוד! 👏") from the result screen

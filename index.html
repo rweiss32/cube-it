@@ -201,29 +201,55 @@
     .timer-bar { height: 6px; border-radius: 3px; background: #4ecca3;
                  transition: width 1s linear, background 1s; width: 100%; }
 
+    /* ── TABLE ── */
+    .game-table {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 0 0 5px #8b6914, 0 0 0 10px #5a3d0a, 0 4px 12px rgba(0,0,0,0.35);
+    }
+    .action-area { width: 100%; display: flex; flex-direction: column; gap: 4px; }
+
     /* ── TILES ── */
     .tiles-section {
       width: 100%;
-      padding: 0;
-      position: relative;
+      background: linear-gradient(160deg, #1a5232 0%, #246b42 50%, #1a5232 100%);
+      padding: 6px 0 8px;
+      border-radius: 0 0 16px 16px;
+      display: flex; flex-direction: column; align-items: center;
     }
-    .tiles-section::after {
-      content: '';
-      display: block;
+    .tiles-tray {
+      width: min(calc(8 * min(58px, (100vw - 42px) / 8) + 7 * 6px + 24px), 100%);
       height: 30px;
-      width: min(522px, 100%);
-      background: linear-gradient(to bottom, #d4a96a 0%, #b8844a 60%, #9a6830 100%);
-      border-radius: 0 0 8px 8px;
-      box-shadow: 0 8px 0 #6b3e18, 0 8px 16px rgba(0,0,0,0.28);
-      margin: -24px auto 0;
+      margin-top: -24px;
+      background: linear-gradient(
+        to bottom,
+        #f4e4b0 0%,
+        #e8d090 10%,
+        #5a3c18 16%, #5a3c18 22%,
+        #e0c87a 27%,
+        #cdb060 50%,
+        #b89448 78%,
+        #a07830 100%
+      );
+      border-radius: 6px;
+      box-shadow: 0 5px 0 #7a5820, 0 8px 18px rgba(0,0,0,0.3);
     }
     @media (prefers-color-scheme: dark) {
-      .tiles-section::after {
-        background: linear-gradient(to bottom, #6b4422 0%, #4a2e14 60%, #321e0a 100%);
-        box-shadow: 0 7px 0 #1a0e05, 0 8px 16px rgba(0,0,0,0.5);
+      .tiles-tray {
+        background: linear-gradient(
+          to bottom,
+          #c8a860 0%,
+          #b89040 10%,
+          #1a0e04 16%, #1a0e04 22%,
+          #a07830 27%,
+          #8a6422 50%,
+          #6b4818 78%,
+          #4a3010 100%
+        );
+        box-shadow: 0 5px 0 #1a0e05, 0 8px 18px rgba(0,0,0,0.55);
       }
     }
-    .tiles-label { font-size: 0.8rem; color: rgba(255,255,255,0.75); margin-bottom: 8px; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+    .tiles-label { display: none; }
     .tiles-row { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: center; position: relative; z-index: 1; }
     #g-tiles.tiles-dragging .tile { transition: transform 0.15s ease; }
     #g-word-preview.drop-target { outline: 2px dashed #4ecca3; border-radius: 8px; background: rgba(78,204,163,0.08); }
@@ -246,15 +272,15 @@
     .tile.used { background: var(--tile-used-bg); color: var(--tile-used-color); cursor: default; box-shadow: 0 2px 0 var(--tile-used-shadow); }
     .tile.joker { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
     .tile.joker.selected { background: #4ecca3; }
-    .space-btn-row { margin-top: 8px; display: flex; justify-content: center; }
+    .space-btn-row { width: 100%; margin-top: 8px; display: flex; justify-content: center; position: relative; z-index: 1; }
     .btn-space {
       height: 42px; width: min(220px, 60%);
-      background: #d6e4f0;
+      background: #8ab4d8;
       border-radius: 8px; border: none;
       font-family: inherit; font-size: 0;
       user-select: none; -webkit-user-select: none;
       cursor: pointer;
-      box-shadow: 0 4px 0 #7aa0bc;
+      box-shadow: 0 4px 0 #5a8aae;
       transition: transform .1s, box-shadow .1s, background .1s;
       position: relative;
     }
@@ -266,18 +292,22 @@
     }
     .btn-space:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 7px 0 #7aa0bc; }
     .btn-space:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #7aa0bc; }
-    .btn-space:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-space:disabled { opacity: 0.55; cursor: not-allowed; }
 
     /* ── WORD BUILDER ── */
-    .word-builder { background: var(--bg-card); border-radius: 14px; padding: 16px; width: 100%; }
-    .word-builder-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .word-builder { background: linear-gradient(160deg, #1a5232 0%, #246b42 50%, #1a5232 100%); border-radius: 16px 16px 0 0; padding: 16px 16px 16px; width: 100%; position: relative; }
+    .word-builder::before {
+      content: 'המילה שלך'; position: absolute; top: 6px; right: 14px;
+      font-size: 0.65rem; color: rgba(255,255,255,0.3); letter-spacing: 1px; pointer-events: none;
+    }
+    .word-builder-label { display: none; }
     .word-preview {
-      min-height: 66px; background: var(--bg-input); border-radius: 10px; padding: 8px 12px;
+      min-height: 120px; background: transparent; border-radius: 10px; padding: 8px 4px;
       display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow-x: auto;
-      scrollbar-width: none; margin-bottom: 10px;
+      scrollbar-width: none;
     }
     .word-preview::-webkit-scrollbar { display: none; }
-    .word-preview-empty { color: var(--text-muted); font-size: 0.9rem; align-self: center; }
+    .word-preview-empty { color: rgba(255,255,255,0.4); font-size: 0.9rem; align-self: center; }
     .word-tile {
       width: min(52px, calc((100vw - 104px) / 8.5));
       height: min(52px, calc((100vw - 104px) / 8.5));
@@ -292,7 +322,7 @@
       width: min(28px, calc((100vw - 104px) / 17));
       height: min(52px, calc((100vw - 104px) / 8.5));
       display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
-      color: var(--text-muted); font-size: 1.1rem; cursor: pointer; border-radius: 7px;
+      color: rgba(255,255,255,0.45); font-size: 1.1rem; cursor: pointer; border-radius: 7px;
       background: transparent; border: none; transition: background .15s, color .15s;
     }
     .word-tile-space:hover { background: rgba(255,107,107,0.2); color: #ff6b6b; }
@@ -471,7 +501,7 @@
       .def-hint               { font-size: 0.85rem; margin-top: 4px; }
       .timer                  { font-size: 1.9rem; }
       .tile                   { width: 48px; height: 48px; font-size: 1.4rem; }
-      .word-builder           { padding: 10px; }
+      .word-builder           { padding: 14px 16px; }
       .word-preview           { min-height: 52px; padding: 6px 10px; margin-bottom: 6px; }
       .word-tile              { width: 46px; height: 46px; font-size: 1.3rem; }
       .error-msg, .checking-msg { min-height: 16px; font-size: 0.82rem; }
@@ -533,19 +563,22 @@
     <div class="timer-bar-bg"><div class="timer-bar" id="g-timer-bar"></div></div>
   </div>
 
-  <div class="tiles-section">
-    <div class="tiles-label">לחץ על אות כדי להוסיף למילה, לחיצה ארוכה כדי לגרור ולסדר מחדש:</div>
-    <div class="tiles-row" id="g-tiles"></div>
+  <div class="game-table">
+    <div class="word-builder">
+      <div class="word-builder-label">המילה שלך — לחץ על אות להסיר:</div>
+      <div class="word-preview" id="g-word-preview">
+        <span class="word-preview-empty">בחר אותיות למעלה...</span>
+      </div>
+    </div>
+    <div class="tiles-section">
+      <div class="tiles-row" id="g-tiles"></div>
+      <div class="tiles-tray"></div>
+    </div>
   </div>
   <div class="space-btn-row">
     <button class="btn-space" id="btn-space" onclick="insertSpace()" disabled aria-label="רווח"></button>
   </div>
-
-  <div class="word-builder">
-    <div class="word-builder-label">המילה שלך — לחץ על אות להסיר:</div>
-    <div class="word-preview" id="g-word-preview">
-      <span class="word-preview-empty">בחר אותיות למעלה...</span>
-    </div>
+  <div class="action-area">
     <div class="error-msg" id="g-error"></div>
     <div class="checking-msg" id="g-checking"></div>
     <div class="action-row">

@@ -203,24 +203,44 @@
 
     /* ── TABLE ── */
     .game-table {
-      width: 100%;
+      width: calc(100% - 24px);
       border-radius: 16px;
       box-shadow: 0 0 0 5px #8b6914, 0 0 0 10px #5a3d0a, 0 4px 12px rgba(0,0,0,0.35);
+      background: linear-gradient(160deg, #1a5232 0%, #246b42 50%, #1a5232 100%);
+      display: flex; flex-direction: column; align-items: center;
+      overflow: hidden;
     }
     .action-area { width: 100%; display: flex; flex-direction: column; gap: 4px; }
 
-    /* ── TILES ── */
-    .tiles-section {
+    /* ── TABLE ZONES ── */
+    /* North: opponent area */
+    .north-area {
       width: 100%;
-      background: linear-gradient(160deg, #1a5232 0%, #246b42 50%, #1a5232 100%);
-      padding: 6px 0 8px;
-      border-radius: 0 0 16px 16px;
       display: flex; flex-direction: column; align-items: center;
+      padding: 8px 0 0;
+      border-bottom: 1px solid rgba(0,0,0,0.18);
     }
+    /* Center: table felt surface where word is built */
+    .table-center {
+      width: 100%;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding: 24px 12px 10px;
+      min-height: 96px;
+      position: relative;
+    }
+    /* South: player area */
+    .south-area {
+      width: 100%;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 6px 20px 10px;
+      border-top: 1px solid rgba(0,0,0,0.18);
+    }
+
+    /* ── TILES ── */
     .tiles-tray {
-      width: min(calc(8 * min(58px, (100vw - 42px) / 8) + 7 * 6px + 24px), 100%);
-      height: 30px;
-      margin-top: -24px;
+      width: min(calc(8 * min(42px, (100vw - 116px) / 8) + 7 * 6px + 24px), 100%);
+      height: 26px;
+      margin-top: -20px;
       background: linear-gradient(
         to bottom,
         #f4e4b0 0%,
@@ -254,11 +274,11 @@
     #g-tiles.tiles-dragging .tile { transition: transform 0.15s ease; }
     #g-word-preview.drop-target { outline: 2px dashed #4ecca3; border-radius: 8px; background: rgba(78,204,163,0.08); }
     .tile {
-      width: min(58px, calc((100vw - 42px) / 8));
-      height: min(58px, calc((100vw - 42px) / 8));
+      width: min(42px, calc((100vw - 116px) / 8));
+      height: min(42px, calc((100vw - 116px) / 8));
       background: #f5e6c8; color: #2a1a00;
-      border-radius: 8px; border: none;
-      font-size: min(1.7rem, calc((100vw - 42px) / 8 * 0.47));
+      border-radius: 7px; border: none;
+      font-size: min(1.25rem, calc((100vw - 116px) / 8 * 0.47));
       font-weight: 700;
       user-select: none; -webkit-user-select: none;
       cursor: pointer; font-family: inherit;
@@ -272,6 +292,19 @@
     .tile.used { background: var(--tile-used-bg); color: var(--tile-used-color); cursor: default; box-shadow: 0 2px 0 var(--tile-used-shadow); }
     .tile.joker { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
     .tile.joker.selected { background: #4ecca3; }
+    .tile-back {
+      width: 22px; height: 22px;
+      border-radius: 4px; flex-shrink: 0;
+      background: linear-gradient(160deg, #a07830, #7a5820 40%, #5a3c18 70%, #8b6420);
+      box-shadow: 0 2px 0 #3a2608;
+    }
+    .north-area .tiles-tray {
+      width: min(calc(8 * 22px + 7 * 4px + 16px), 100%);
+      height: 16px;
+      margin-top: -12px;
+      box-shadow: 0 3px 0 #7a5820, 0 5px 10px rgba(0,0,0,0.3);
+    }
+    .north-area .tiles-row { gap: 4px; }
     .space-btn-row { width: 100%; margin-top: 8px; display: flex; justify-content: center; position: relative; z-index: 1; }
     .btn-space {
       height: 42px; width: min(220px, 60%);
@@ -295,16 +328,10 @@
     .btn-space:disabled { opacity: 0.55; cursor: not-allowed; }
 
     /* ── WORD BUILDER ── */
-    .word-builder { background: linear-gradient(160deg, #1a5232 0%, #246b42 50%, #1a5232 100%); border-radius: 16px 16px 0 0; padding: 16px 16px 16px; width: 100%; position: relative; }
-    .word-builder::before {
-      content: 'המילה שלך'; position: absolute; top: 6px; right: 14px;
-      font-size: 0.65rem; color: rgba(255,255,255,0.3); letter-spacing: 1px; pointer-events: none;
-    }
-    .word-builder-label { display: none; }
     .word-preview {
-      min-height: 120px; background: transparent; border-radius: 10px; padding: 8px 4px;
-      display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow-x: auto;
-      scrollbar-width: none;
+      min-height: 0; background: transparent; border-radius: 10px; padding: 4px 8px;
+      display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: nowrap; overflow-x: auto;
+      scrollbar-width: none; max-width: 100%;
     }
     .word-preview::-webkit-scrollbar { display: none; }
     .word-preview-empty { color: rgba(255,255,255,0.4); font-size: 0.9rem; align-self: center; }
@@ -500,9 +527,8 @@
       .def-text               { font-size: 2.2rem; }
       .def-hint               { font-size: 0.85rem; margin-top: 4px; }
       .timer                  { font-size: 1.9rem; }
-      .tile                   { width: 48px; height: 48px; font-size: 1.4rem; }
-      .word-builder           { padding: 14px 16px; }
-      .word-preview           { min-height: 52px; padding: 6px 10px; margin-bottom: 6px; }
+      .tile                   { width: 36px; height: 36px; font-size: 1.05rem; }
+      .table-center           { min-height: 80px; padding: 10px 12px; }
       .word-tile              { width: 46px; height: 46px; font-size: 1.3rem; }
       .error-msg, .checking-msg { min-height: 16px; font-size: 0.82rem; }
     }
@@ -564,13 +590,15 @@
   </div>
 
   <div class="game-table">
-    <div class="word-builder">
-      <div class="word-builder-label">המילה שלך — לחץ על אות להסיר:</div>
+    <div class="north-area">
+      <div class="tiles-row" id="g-cpu-tiles-display"></div>
+      <div class="tiles-tray"></div>
+    </div>
+    <div class="table-center">
       <div class="word-preview" id="g-word-preview">
-        <span class="word-preview-empty">בחר אותיות למעלה...</span>
       </div>
     </div>
-    <div class="tiles-section">
+    <div class="south-area">
       <div class="tiles-row" id="g-tiles"></div>
       <div class="tiles-tray"></div>
     </div>
@@ -936,6 +964,7 @@ function nextRound() {
   document.getElementById('g-error').textContent = '';
 
   renderTiles();
+  renderCpuTiles();
   renderWordPreview();
   showScreen('screen-game');
   startTimer();
@@ -972,6 +1001,17 @@ function updateTimerUI() {
 // ══════════════════════════════════════════════
 //  TILE INTERACTION
 // ══════════════════════════════════════════════
+
+function renderCpuTiles() {
+  const container = document.getElementById('g-cpu-tiles-display');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const div = document.createElement('div');
+    div.className = 'tile-back';
+    container.appendChild(div);
+  }
+}
 
 function renderTiles() {
   const container = document.getElementById('g-tiles');
@@ -1157,7 +1197,7 @@ function renderWordPreview() {
   const container = document.getElementById('g-word-preview');
   container.innerHTML = '';
   if (state.selectedIndices.length === 0) {
-    container.innerHTML = '<span class="word-preview-empty">בחר אותיות למעלה...</span>';
+    container.innerHTML = '';
     updateSpaceBtn();
     return;
   }

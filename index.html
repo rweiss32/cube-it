@@ -225,12 +225,38 @@
     /* Center: table felt surface where word is built */
     .table-center {
       width: 100%;
-      display: flex; align-items: flex-end; justify-content: center;
-      padding: 24px 12px 10px;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+      padding: 10px 12px 10px;
       min-height: 130px;
       flex: 1;
       position: relative;
     }
+
+    /* ── TABLE WORDS (letter bank on the table) ── */
+    .bank-display {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 5px; padding: 6px 8px; width: 100%;
+    }
+    .bank-label {
+      font-size: 0.58rem; color: rgba(255,255,255,0.35); letter-spacing: 1px;
+      text-align: center; width: 100%;
+    }
+    .table-word-row { display: flex; gap: 3px; justify-content: center; }
+    .table-word-tile {
+      width: 30px; height: 30px;
+      border-radius: 5px; border: 1.5px solid transparent;
+      font-size: 1rem; font-weight: 700; font-family: inherit;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: transform .1s, border-color .1s, opacity .15s;
+    }
+    .table-word-tile.player { background: #f5e6c8; color: #2a1a00; box-shadow: 0 2px 0 #8b6914; }
+    .table-word-tile.cpu    { background: #e94560; color: #fff;    box-shadow: 0 2px 0 #a02040; }
+    .table-word-tile.joker  { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
+    .table-word-tile:not(:disabled):not(.taken):hover  { transform: translateY(-2px); border-color: #4ecca3; }
+    .table-word-tile:not(:disabled):not(.taken):active { transform: translateY(1px); }
+    .table-word-tile.taken, .table-word-tile:disabled  { opacity: 0.28; cursor: default; }
+
     /* South: player area */
     .south-area {
       width: 100%;
@@ -348,6 +374,7 @@
       cursor: pointer; border: none; transition: background .15s;
     }
     .word-tile:hover { background: #ff6b6b; color: #fff; }
+    .word-tile.from-bank { background: #f7971e; color: #1a1a00; box-shadow: 0 3px 0 #b06000; }
     .word-tile-space {
       width: min(28px, calc((100vw - 104px) / 17));
       height: min(52px, calc((100vw - 104px) / 8.5));
@@ -598,8 +625,8 @@
       <div class="tiles-tray"></div>
     </div>
     <div class="table-center">
-      <div class="word-preview" id="g-word-preview">
-      </div>
+      <div id="g-bank-display" class="bank-display"></div>
+      <div class="word-preview" id="g-word-preview"></div>
     </div>
     <div class="south-area">
       <div class="tiles-row" id="g-tiles"></div>
@@ -733,7 +760,7 @@
 </div>
 
 <script>
-const VERSION = '0.28.0';
+const VERSION = '0.29.0';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -854,6 +881,8 @@ function initState() {
     timerHandle: null,
     usedCatIndices: [],
     cpuName: pickCpuName(null),
+    tableWords: [],       // [{ tiles:[{letter,taken}], owner:'player'|'cpu' }]
+    bankPickedThisRound: false,
   };
 }
 
@@ -894,6 +923,22 @@ function canSpell(word, tiles) {
   }
   const jokersAvail = avail.filter(t => t === '★').length;
   return jokersNeeded <= jokersAvail;
+}
+
+function getUsedTileLetters(tiles, word) {
+  if (!word) return [];
+  const letters = [...norm(word)].filter(c => c !== ' ');
+  const avail = [...tiles];
+  const usedIndices = new Set();
+  for (const ch of letters) {
+    const idx = avail.findIndex((t, i) => t === ch && !usedIndices.has(i));
+    if (idx !== -1) usedIndices.add(idx);
+    else {
+      const ji = avail.findIndex((t, i) => t === '★' && !usedIndices.has(i));
+      if (ji !== -1) usedIndices.add(ji);
+    }
+  }
+  return [...usedIndices].map(i => tiles[i]);
 }
 
 function cpuBestWord(tiles, catKey) {
@@ -966,9 +1011,12 @@ function nextRound() {
   document.getElementById('g-round').textContent        = `${state.round} / ${MAX_ROUNDS}`;
   document.getElementById('g-error').textContent = '';
 
+  state.bankPickedThisRound = false;
+  cpuBankPick();
   renderTiles();
   renderCpuTiles();
   renderWordPreview();
+  renderBankDisplay();
   showScreen('screen-game');
   startTimer();
 }
@@ -1009,11 +1057,67 @@ function renderCpuTiles() {
   const container = document.getElementById('g-cpu-tiles-display');
   if (!container) return;
   container.innerHTML = '';
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < state.cpuTiles.length; i++) {
     const div = document.createElement('div');
     div.className = 'tile-back';
     container.appendChild(div);
   }
+}
+
+function renderBankDisplay() {
+  const container = document.getElementById('g-bank-display');
+  if (!container) return;
+  container.innerHTML = '';
+  if (state.tableWords.length === 0) return;
+
+  const hasAvailable = state.tableWords.some(w => w.tiles.some(t => !t.taken));
+  const label = document.createElement('div');
+  label.className = 'bank-label';
+  label.textContent = !hasAvailable ? 'בנק ריק' : state.bankPickedThisRound ? 'בנק (לקחת אות)' : 'בנק — לחץ על אות כדי לקחת';
+  container.appendChild(label);
+
+  state.tableWords.forEach((word, wordIdx) => {
+    const row = document.createElement('div');
+    row.className = 'table-word-row';
+    word.tiles.forEach((tile, tileIdx) => {
+      const btn = document.createElement('button');
+      const isJoker = tile.letter === '★';
+      btn.className = `table-word-tile ${word.owner}${tile.taken ? ' taken' : ''}${isJoker ? ' joker' : ''}`;
+      btn.textContent = tile.letter;
+      btn.disabled = tile.taken || state.bankPickedThisRound;
+      btn.onclick = () => pickBankTileFromTable(wordIdx, tileIdx);
+      row.appendChild(btn);
+    });
+    container.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  LETTER BANK
+// ══════════════════════════════════════════════
+
+function pickBankTileFromTable(wordIdx, tileIdx) {
+  if (state.bankPickedThisRound) return;
+  const tile = state.tableWords[wordIdx]?.tiles[tileIdx];
+  if (!tile || tile.taken) return;
+  soundClick();
+  tile.taken = true;
+  state.selectedIndices.push({ letter: tile.letter, fromBank: true, wordIdx, tileIdx });
+  state.bankPickedThisRound = true;
+  renderWordPreview();
+  renderBankDisplay();
+}
+
+function cpuBankPick() {
+  const available = [];
+  state.tableWords.forEach((w, wi) =>
+    w.tiles.forEach((t, ti) => { if (!t.taken) available.push({ wi, ti }); })
+  );
+  if (available.length === 0) return;
+  const { wi, ti } = available[Math.floor(Math.random() * available.length)];
+  const tile = state.tableWords[wi].tiles[ti];
+  state.cpuTiles.push(tile.letter);
+  tile.taken = true;
 }
 
 function renderTiles() {
@@ -1213,9 +1317,9 @@ function renderWordPreview() {
       btn.onclick = () => deselectTile(wordPos);
       container.appendChild(btn);
     } else {
-      const letter = state.playerTiles[tileIdx];
+      const letter = tileIdx?.fromBank ? tileIdx.letter : state.playerTiles[tileIdx];
       const btn = document.createElement('button');
-      btn.className = 'word-tile';
+      btn.className = 'word-tile' + (tileIdx?.fromBank ? ' from-bank' : '');
       btn.textContent = letter;
       btn.onclick = () => deselectTile(wordPos);
       container.appendChild(btn);
@@ -1233,15 +1337,27 @@ function selectTile(i) {
 }
 
 function deselectTile(wordPos) {
-  state.selectedIndices.splice(wordPos, 1);
+  const entry = state.selectedIndices.splice(wordPos, 1)[0];
+  if (entry?.fromBank) {
+    state.tableWords[entry.wordIdx].tiles[entry.tileIdx].taken = false;
+    state.bankPickedThisRound = false;
+    renderBankDisplay();
+  }
   renderTiles();
   renderWordPreview();
 }
 
 function clearWord() {
+  state.selectedIndices.forEach(entry => {
+    if (entry?.fromBank) {
+      state.tableWords[entry.wordIdx].tiles[entry.tileIdx].taken = false;
+      state.bankPickedThisRound = false;
+    }
+  });
   state.selectedIndices = [];
   renderTiles();
   renderWordPreview();
+  renderBankDisplay();
 }
 
 function insertSpace() {
@@ -1409,7 +1525,7 @@ async function submitWord() {
   }
 
   // Build raw tiles array (spaces are free — not drawn from the tile pool)
-  const rawTiles = state.selectedIndices.map(i => i === 'SPACE' ? ' ' : state.playerTiles[i]);
+  const rawTiles = state.selectedIndices.map(i => i === 'SPACE' ? ' ' : i?.fromBank ? i.letter : state.playerTiles[i]);
 
   // Resolve jokers first (if any)
   const hasJokers = rawTiles.includes('★');
@@ -1505,6 +1621,16 @@ async function endRound(playerWord, warning) {
   const playerWikiWord = pw ? pw.split(' ').map(finalForm).join(' ') : null;
   const wikiPromise = playerWikiWord ? fetchWikiSummary(playerWikiWord) : Promise.resolve(null);
   const cw = cpuBestWord(state.cpuTiles, state.currentCatKey);
+
+  // Collect used tiles into the letter bank
+  const playerUsedTiles = pw
+    ? state.selectedIndices.filter(i => i !== 'SPACE').map(i => i?.fromBank ? i.letter : state.playerTiles[i])
+    : [];
+  const cpuUsedTiles = getUsedTileLetters(state.cpuTiles, cw);
+  if (playerUsedTiles.length > 0)
+    state.tableWords.push({ tiles: playerUsedTiles.map(l => ({ letter: l, taken: false })), owner: 'player' });
+  if (cpuUsedTiles.length > 0)
+    state.tableWords.push({ tiles: cpuUsedTiles.map(l => ({ letter: l, taken: false })), owner: 'cpu' });
 
   const pLen = [...pw].filter(c => c !== ' ').length;
   const cLen = [...norm(cw)].filter(c => c !== ' ').length;

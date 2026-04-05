@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.29.0] 2026-04-05 — letter bank — previous round words displayed on the table as clickable tiles, player picks one tile per round to use directly in their word
+
+- After each round, both player and CPU words are laid out on the table as readable tile rows (player tiles cream, CPU tiles coral)
+- Player can tap any bank tile during the round to place it directly into their current word; tapping it again in the word returns it to the bank
+- CPU auto-picks one tile from the bank at the start of each round
+
 ## [0.28.0] 2026-04-05 — table redesign — smaller tray and tiles placed on a green felt table, opponent (CPU) tiles shown face-down at the north end, chosen word tiles anchored near the player's tray, table fills the screen height
 
 - Redesigned game table as a full green felt surface with north (opponent) and south (player) zones; table now stretches to fill the viewport

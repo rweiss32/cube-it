@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.28.0] 2026-04-05 — table redesign — smaller tray and tiles placed on a green felt table, opponent (CPU) tiles shown face-down at the north end, chosen word tiles anchored near the player's tray, table fills the screen height
+
+- Redesigned game table as a full green felt surface with north (opponent) and south (player) zones; table now stretches to fill the viewport
+- Player tiles and tray made smaller with padding gaps; opponent tiles shown as small face-down wooden tiles at the top
+- Definition card and timer reduced in size to give more room to the table
+
 ## [0.27.1] 2026-03-30 — Put all cubes in the same line
 
 

@@ -5,6 +5,8 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.29.1] 2026-04-14 - Updated list of words
+
 ## [0.29.0] 2026-04-05 — letter bank — previous round words displayed on the table as clickable tiles, player picks one tile per round to use directly in their word
 
 - After each round, both player and CPU words are laid out on the table as readable tile rows (player tiles cream, CPU tiles coral)

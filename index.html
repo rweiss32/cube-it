@@ -998,8 +998,10 @@ function nextRound() {
   if (available.length === 0) { state.usedCatIndices = []; available = CARD_KEYS.map((_,i)=>i); }
   const pick = available[Math.floor(Math.random() * available.length)];
   state.usedCatIndices.push(pick);
-  state.currentCatKey = 
-  debugParam ? state.currentCatKey = 'מקום' : CARD_KEYS[pick]; // DEBUG case
+
+  const debug_category = 'יישוב או עיר בארץ עם יותר מ 1000 תושבים';
+  state.currentCatKey =
+  debugParam ? debug_category : CARD_KEYS[pick]; // DEBUG case
 
   updateCpuNameLabels();
 

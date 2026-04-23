@@ -1683,13 +1683,6 @@ async function submitWord() {
     return;
   }
 
-  // Multi-word terms can't be validated via Wiktionary — must be in the category list
-  if (word.includes(' ')) {
-    console.log(`[submitWord] REJECT — multi-word term not in category list`);
-    document.getElementById('g-error').textContent = `"${word}" לא נמצאה ברשימה. נסה מילה אחרת!`;
-    return;
-  }
-
   // Not in list — ask AI
   setSubmitLocked(true);
   document.getElementById('g-checking').innerHTML = '🤖 בודק עם AI<span class="checking-dots"><span>.</span><span>.</span><span>.</span></span>';

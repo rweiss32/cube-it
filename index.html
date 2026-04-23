@@ -253,7 +253,9 @@
     .table-word-tile.player { background: #f5e6c8; color: #2a1a00; box-shadow: 0 2px 0 #8b6914; }
     .table-word-tile.cpu    { background: #e94560; color: #fff;    box-shadow: 0 2px 0 #a02040; }
     .table-word-tile.joker        { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
-    .table-word-tile.vowel-joker  { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: 0.68rem; line-height: 1.15; flex-direction: column; box-shadow: 0 2px 0 #1565a0; }
+    .table-word-tile.vowel-joker  { background: linear-gradient(135deg,#4ecca3,#2196f3); position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; padding: 0; font-size: 0; line-height: 1; flex-direction: unset; box-shadow: 0 2px 0 #1565a0; }
+    .table-word-tile.vowel-joker::after { content: ''; position: absolute; top: 12%; bottom: 12%; left: calc(50% - 0.5px); width: 1px; background: rgba(0,10,30,0.25); pointer-events: none; }
+    .table-word-tile.vowel-joker span { background: transparent; color: #0a1a2e; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; line-height: 1; }
     .table-word-tile:not(:disabled):not(.taken):hover  { transform: translateY(-2px); border-color: #4ecca3; }
     .table-word-tile:not(:disabled):not(.taken):active { transform: translateY(1px); }
     .table-word-tile.taken, .table-word-tile:disabled  { opacity: 0.28; cursor: default; }
@@ -323,11 +325,14 @@
     .tile.joker { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
     .tile.joker.selected { background: #4ecca3; }
     .tile.vowel-joker {
-      background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e;
-      font-size: min(0.82rem, calc((100vw - 116px) / 8 * 0.38));
-      line-height: 1.2; flex-direction: column; gap: 0;
+      background: linear-gradient(135deg,#4ecca3,#2196f3); position: relative;
+      display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+      gap: 0; padding: 0; font-size: 0; line-height: 1; flex-direction: unset;
     }
-    .tile.vowel-joker.selected { background: #f7971e; color: #1a1a00; }
+    .tile.vowel-joker::after { content: ''; position: absolute; top: 12%; bottom: 12%; left: calc(50% - 0.5px); width: 1px; background: rgba(0,10,30,0.25); pointer-events: none; }
+    .tile.vowel-joker span { background: transparent; color: #0a1a2e; display: flex; align-items: center; justify-content: center; font-size: min(0.8rem, calc((100vw - 116px) / 8 * 0.38)); line-height: 1; }
+    .tile.vowel-joker.selected { background: #f7971e; }
+    .tile.vowel-joker.selected span { color: #1a1a00; }
     .tile-back {
       width: 22px; height: 22px;
       border-radius: 4px; flex-shrink: 0;
@@ -376,8 +381,10 @@
     }
     .word-tile:hover { background: #ff6b6b; color: #fff; }
     .word-tile.from-bank { background: #f7971e; color: #1a1a00; box-shadow: 0 3px 0 #b06000; }
-    .word-tile.vowel-joker { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: min(0.82rem, calc((100vw - 104px) / 8.5 * 0.38)); line-height: 1.2; flex-direction: column; }
-    .word-tile.vowel-joker:hover { background: linear-gradient(135deg,#6ed8b5,#42a5f5); color: #0a1a2e; }
+    .word-tile.vowel-joker { background: linear-gradient(135deg,#4ecca3,#2196f3); position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; padding: 0; font-size: 0; line-height: 1; flex-direction: unset; }
+    .word-tile.vowel-joker::after { content: ''; position: absolute; top: 12%; bottom: 12%; left: calc(50% - 0.5px); width: 1px; background: rgba(0,10,30,0.25); pointer-events: none; }
+    .word-tile.vowel-joker span { background: transparent; color: #0a1a2e; display: flex; align-items: center; justify-content: center; font-size: min(0.8rem, calc((100vw - 104px) / 8.5 * 0.38)); line-height: 1; }
+    .word-tile.vowel-joker:hover { background: linear-gradient(135deg,#6ed8b5,#42a5f5); }
     .word-tile-space {
       width: min(28px, calc((100vw - 104px) / 17));
       height: min(52px, calc((100vw - 104px) / 8.5));
@@ -448,7 +455,9 @@
     }
     .jwt-normal { background: #f5e6c8; color: #2a1a00; }
     .jwt-joker  { background: #8048d0; color: #fff; animation: jokerpulse 1s infinite alternate; }
-    .jwt-joker.jwt-vowel { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: 0.68rem; line-height: 1.15; flex-direction: column; }
+    .jwt-joker.jwt-vowel { background: linear-gradient(135deg,#4ecca3,#2196f3); position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; padding: 0; font-size: 0; line-height: 1; flex-direction: unset; }
+    .jwt-joker.jwt-vowel::after { content: ''; position: absolute; top: 12%; bottom: 12%; left: calc(50% - 0.5px); width: 1px; background: rgba(0,10,30,0.25); pointer-events: none; }
+    .jwt-joker.jwt-vowel span { background: transparent; color: #0a1a2e; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; line-height: 1; }
     .jwt-assigned { background: #4ecca3; color: #0a1a14; }
     .jwt-space  { background: transparent; color: #8a8a8a; font-size: 0.9rem; min-width: 16px; }
     @keyframes jokerpulse { from { opacity:1; } to { opacity:.5; } }
@@ -529,6 +538,9 @@
     .rt-cpu { background: #e94560; color: #fff; }
     .rt-used { opacity: 1; }
     .rt-unused { opacity: .25; }
+    .rt.vowel-joker { background: linear-gradient(135deg,#4ecca3,#2196f3); position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; padding: 0; font-size: 0; }
+    .rt.vowel-joker::after { content: ''; position: absolute; top: 12%; bottom: 12%; left: calc(50% - 0.5px); width: 1px; background: rgba(0,10,30,0.25); pointer-events: none; }
+    .rt.vowel-joker span { background: transparent; color: #0a1a2e; display: flex; align-items: center; justify-content: center; font-size: 0.74rem; line-height: 1; }
 
     /* ── SCORE BAR HELPERS ── */
     .score-bar-center { text-align: center; }
@@ -772,7 +784,7 @@
 </div>
 
 <script>
-const VERSION = '0.31.1';
+const VERSION = '0.32.0';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1128,7 +1140,7 @@ function renderBankDisplay() {
       const isJoker = tile.letter === '★';
       const isVowelJoker = tile.letter === '☆';
       btn.className = `table-word-tile ${word.owner}${tile.taken ? ' taken' : ''}${isJoker ? ' joker' : ''}${isVowelJoker ? ' vowel-joker' : ''}`;
-      if (isVowelJoker) { btn.innerHTML = '<span>אה</span><span>וי</span>'; }
+      if (isVowelJoker) { btn.innerHTML = '<span>א</span><span>ה</span><span>ו</span><span>י</span>'; }
       else { btn.textContent = tile.letter; }
       btn.disabled = tile.taken || state.bankPickedThisRound;
       btn.onclick = () => pickBankTileFromTable(wordIdx, tileIdx);
@@ -1176,7 +1188,7 @@ function renderTiles() {
     const tileType = letter === '★' ? ' joker' : letter === '☆' ? ' vowel-joker' : '';
     btn.className = 'tile' + tileType + (isSelected ? ' selected used' : '');
     if (letter === '☆') {
-      btn.innerHTML = '<span>אה</span><span>וי</span>';
+      btn.innerHTML = '<span>א</span><span>ה</span><span>ו</span><span>י</span>';
     } else {
       btn.textContent = letter;
     }
@@ -1372,7 +1384,7 @@ function renderWordPreview() {
       const btn = document.createElement('button');
       const isVowelJoker = letter === '☆';
       btn.className = 'word-tile' + (tileIdx?.fromBank ? ' from-bank' : '') + (isVowelJoker ? ' vowel-joker' : '');
-      if (isVowelJoker) { btn.innerHTML = '<span>אה</span><span>וי</span>'; }
+      if (isVowelJoker) { btn.innerHTML = '<span>א</span><span>ה</span><span>ו</span><span>י</span>'; }
       else { btn.textContent = letter; }
       btn.onclick = () => deselectTile(wordPos);
       container.appendChild(btn);
@@ -1498,7 +1510,7 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
         d.textContent = '·';
       } else if (idx === jokerWordPos) {
         d.className = 'joker-word-tile jwt-joker' + (isVowelJoker ? ' jwt-vowel' : '');
-        if (isVowelJoker) { d.innerHTML = '<span>אה</span><span>וי</span>'; }
+        if (isVowelJoker) { d.innerHTML = '<span>א</span><span>ה</span><span>ו</span><span>י</span>'; }
         else { d.textContent = '★'; }
       } else if (assignedPositions.includes(idx)) {
         d.className = 'joker-word-tile jwt-assigned';
@@ -1851,7 +1863,7 @@ function renderResultTiles(containerId, tiles, word, tileClass) {
   tiles.forEach((letter, i) => {
     const d = document.createElement('div');
     d.className = `rt ${tileClass} ${usedIndices.has(i) ? 'rt-used' : 'rt-unused'}`;
-    if (letter === '☆') { d.innerHTML = '<span>אה</span><span>וי</span>'; d.style.cssText = 'font-size:0.5rem;line-height:1.15;flex-direction:column'; }
+    if (letter === '☆') { d.classList.add('vowel-joker'); d.innerHTML = '<span>א</span><span>ה</span><span>ו</span><span>י</span>'; }
     else { d.textContent = letter; }
     container.appendChild(d);
   });

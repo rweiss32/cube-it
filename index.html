@@ -400,7 +400,18 @@
                   border: none; cursor: pointer; transition: background .15s; }
     .btn-submit:hover:not(:disabled) { background: #3db893; }
     .btn-submit:disabled { background: #2a4a40; color: #4a8a78; cursor: not-allowed; }
-    .checking-msg { color: #f7971e; font-size: 0.88rem; min-height: 20px; }
+    .checking-msg { min-height: 28px; display: flex; align-items: center; }
+    .checking-msg:not(:empty) {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #4ecca3; color: #0a1a14;
+      border-radius: 20px; padding: 4px 14px;
+      font-size: 0.95rem; font-weight: 700;
+    }
+    .checking-dots { font-size: 1.4em; line-height: 1; vertical-align: middle; }
+    .checking-dots span { animation: checking-blink 1.4s infinite both; opacity: 0; }
+    .checking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .checking-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes checking-blink { 40% { opacity: 1; } }
     .btn-clear { background: var(--btn-clear-bg); color: var(--btn-clear-color); border-radius: 10px; padding: 12px 16px;
                  font-size: 0.9rem; font-family: inherit; border: none; cursor: pointer; }
     .btn-clear:hover { background: var(--btn-clear-hover); color: var(--btn-clear-hover-color); }
@@ -583,7 +594,8 @@
       .tile                   { width: 36px; height: 36px; font-size: 1.05rem; }
       .table-center           { min-height: 80px; padding: 10px 12px; }
       .word-tile              { width: 46px; height: 46px; font-size: 1.3rem; }
-      .error-msg, .checking-msg { min-height: 16px; font-size: 0.82rem; }
+      .error-msg { min-height: 16px; font-size: 0.82rem; }
+      .checking-msg { min-height: 24px; font-size: 0.88rem; }
     }
 
   </style>
@@ -784,7 +796,7 @@
 </div>
 
 <script>
-const VERSION = '0.33.1';
+const VERSION = '0.34.0';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1449,6 +1461,50 @@ function updateSpaceBtn() {
 
 const wordCache = new Map(); // cache: normalizedWord → true/false/null(network error)
 
+// ── AI CATEGORY VALIDATION ──────────────────────
+const AI_URL = 'https://cube-it-server.vercel.app/api/check';
+const AI_CACHE_LS_KEY = 'cube-it-ai-cache';
+
+function _aiCache() {
+  try { return JSON.parse(localStorage.getItem(AI_CACHE_LS_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+// Returns true (valid), false (invalid), or null (network error)
+async function validateWordWithAI(word, category) {
+  const cacheKey = norm(word) + ':' + category;
+  const cache = _aiCache();
+
+  if (cacheKey in cache) {
+    console.log(`[AI] cache hit — "${word}" / "${category}" →`, cache[cacheKey]);
+    return cache[cacheKey];
+  }
+
+  const requestBody = { word, category };
+  console.log(`[AI] REQUEST →`, AI_URL, requestBody);
+
+  try {
+    const res = await fetch(AI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+    console.log(`[AI] HTTP status: ${res.status} ${res.statusText}`);
+    const data = await res.json();
+    console.log(`[AI] RESPONSE ←`, data);
+    const result = data.answer.trim().toLowerCase() === 'yes';
+    if (result) {
+      cache[cacheKey] = true;
+      localStorage.setItem(AI_CACHE_LS_KEY, JSON.stringify(cache));
+      if (CATEGORIES[state.currentCatKey]) CATEGORIES[state.currentCatKey].words.push(word);
+    }
+    return result;
+  } catch (e) {
+    console.error(`[AI] ERROR:`, e);
+    return null;
+  }
+}
+
 async function isHebrewWord(word) {
   const key = norm(word);               // cache key without final forms
   const lookup = finalForm(key);        // Wiktionary lookup with correct final form
@@ -1587,12 +1643,15 @@ function setSubmitLocked(locked) {
 }
 
 async function submitWord() {
+
   const tileCount = state.selectedIndices.filter(i => i !== 'SPACE').length;
   if (tileCount < 2) {
+    console.log(`[submitWord] REJECT — fewer than 2 tiles (${tileCount})`);
     document.getElementById('g-error').textContent = 'מילה חייבת להכיל לפחות 2 אותיות!';
     return;
   }
   if (state.selectedIndices[state.selectedIndices.length - 1] === 'SPACE') {
+    console.log(`[submitWord] REJECT — trailing space`);
     document.getElementById('g-error').textContent = 'מילה לא יכולה להסתיים ברווח!';
     return;
   }
@@ -1603,51 +1662,46 @@ async function submitWord() {
   // Resolve jokers first (if any)
   const hasJokers = rawTiles.includes('★') || rawTiles.includes('☆');
   const resolvedTiles = hasJokers ? await resolveJokers(rawTiles) : rawTiles;
-  if (resolvedTiles === null) return; // cancelled
+  if (resolvedTiles === null) { console.log(`[submitWord] joker resolution cancelled`); return; }
+
   // Apply finalForm to each sub-word part (handles 2-word terms like בית ספר)
   const word = resolvedTiles.join('').split(' ').map(finalForm).join(' ');
+  console.log(`[submitWord] word: "${word}"`);
 
   document.getElementById('g-error').textContent = '';
 
   // Check category word list first (fast, no API)
   const catWords = CATEGORIES[state.currentCatKey]?.words || [];
   const inCategoryList = catWords.some(w => norm(w) === norm(word));
+  console.log(`[submitWord] in category list: ${inCategoryList}`);
 
   if (inCategoryList) {
+    console.log(`[submitWord] ACCEPT — found in category list`);
     soundSubmit();
     clearInterval(state.timerHandle);
     endRound(word);
     return;
   }
 
-  // Multi-word terms can't be validated via Wiktionary — must be in the category list
-  if (word.includes(' ')) {
-    document.getElementById('g-error').textContent = `"${word}" לא נמצאה ברשימה. נסה מילה אחרת!`;
-    return;
-  }
-
-  // Not in list — fall back to Wiktionary
+  // Not in list — ask AI
   setSubmitLocked(true);
-  document.getElementById('g-checking').textContent = '🔍 בודק במילון...';
+  document.getElementById('g-checking').innerHTML = '🤖 בודק עם AI<span class="checking-dots"><span>.</span><span>.</span><span>.</span></span>';
 
-  const result = await isHebrewWord(word);
+  const catLabel = CATEGORIES[state.currentCatKey]?.category || state.currentCatKey;
+  const aiResult = await validateWordWithAI(word, catLabel);
+  console.log(`[submitWord] AI result: ${aiResult}`);
 
   document.getElementById('g-checking').textContent = '';
   setSubmitLocked(false);
 
-  if (result === false) {
-    document.getElementById('g-error').textContent = `"${word}" לא נמצאה במילון. נסה מילה אחרת!`;
+  if (aiResult === false) {
+    document.getElementById('g-error').textContent = `"${word}" לא מתאימה לקטגוריה. נסה מילה אחרת!`;
     return;
-  }
-  let warning = null;
-  if (result === null) {
-    warning = 'לא ניתן לאמת — המילה התקבלה';
-  } else {
-    warning = 'המילה לא מופיעה ברשימה שלנו — וודא שהיא אכן מתאימה להגדרה';
   }
 
   soundSubmit();
   clearInterval(state.timerHandle);
+  const warning = aiResult === null ? 'לא ניתן לאמת — המילה התקבלה' : null;
   endRound(word, warning);
 }
 

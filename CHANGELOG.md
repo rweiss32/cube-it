@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.34.0] 2026-04-24 — AI word validation with animated indicator and multi-word support
+
+- Words not in the category list are validated by AI (Gemma via Vercel proxy), including multi-word terms
+- Animated teal pill badge with blinking dots shown while waiting for AI response
+- Only valid (true) results cached — incorrect AI rejections don't get permanently locked in
+
 ## [0.33.1] 2026-04-23 — add animals words to in-nature category
 
 - Added animal-related words to the in-nature category word list

@@ -8,26 +8,24 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <style>
     :root {
-      --bg:                 #f5f5fa;
-      --bg-card:            #ebebf5;
-      --bg-header:          #ffffff;
-      --border-header:      #d8d8e8;
+      --bg:                 #f0f0fa;
+      --bg-card:            rgba(255,255,255,0.72);
+      --bg-header:          rgba(255,255,255,0.88);
+      --border-header:      #d0d0e8;
       --text:               #1a1a2e;
-      --text-muted:         #666;
       --text-dim:           #999;
-      --btn-outline-border: #aaa;
+      --btn-outline-border: #bbb;
       --btn-outline-color:  #444;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg:                 #0f0f1a;
-        --bg-card:            #1c1c2e;
-        --bg-header:          #0a0a14;
-        --border-header:      #1e1e30;
+        --bg:                 #0c0c1e;
+        --bg-card:            rgba(20,20,40,0.82);
+        --bg-header:          rgba(8,8,18,0.92);
+        --border-header:      #1e1e38;
         --text:               #eee;
-        --text-muted:         #888;
         --text-dim:           #555;
-        --btn-outline-border: #555;
+        --btn-outline-border: #444;
         --btn-outline-color:  #ccc;
       }
     }
@@ -37,6 +35,7 @@
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% 0%, rgba(78,204,163,0.14) 0%, transparent 65%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
@@ -49,6 +48,8 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 200;
       background: var(--bg-header);
       border-bottom: 1px solid var(--border-header);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       padding: 10px 20px;
       display: flex;
       flex-direction: column;
@@ -63,26 +64,46 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 28px;
+      gap: 0;
       width: 100%;
-      max-width: 480px;
+      max-width: 420px;
       padding: 120px 20px 48px;
     }
 
+    /* ── CARD ── */
+    .card {
+      background: var(--bg-card);
+      border-radius: 28px;
+      padding: 28px 20px 32px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.13), 0 0 0 1px rgba(78,204,163,0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
     /* ── DURATION PICKER ── */
-    #duration-picker { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    #duration-picker { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: center; }
 
     .dur-btn {
-      font-family: inherit; font-size: 0.95rem;
-      padding: 8px 20px; border-radius: 50px;
+      font-family: inherit; font-size: 0.78rem;
+      padding: 5px 12px; border-radius: 50px;
       border: 2px solid var(--btn-outline-border);
       background: transparent; color: var(--btn-outline-color);
-      cursor: pointer; transition: border-color .15s, color .15s, background .15s;
+      cursor: pointer; white-space: nowrap;
+      transition: border-color .18s, color .18s, background .18s, box-shadow .18s;
     }
-    .dur-btn:hover:not(:disabled) { border-color: #ffd200; color: #f7971e; }
+    .dur-btn:hover:not(:disabled) {
+      border-color: #ffd200; color: #f7971e;
+      box-shadow: 0 0 14px rgba(255,210,0,0.22);
+    }
     .dur-btn.active {
       background: linear-gradient(135deg, #f7971e, #ffd200);
       color: #1a1a00; font-weight: 700; border-color: transparent;
+      box-shadow: 0 4px 18px rgba(255,210,0,0.38);
     }
     .dur-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -90,25 +111,85 @@
     #hourglass-wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
 
     #hourglass-svg {
-      width: min(180px, 50vw); height: auto;
-      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.18));
+      width: min(190px, 52vw); height: auto;
+      filter: drop-shadow(0 6px 22px rgba(78,204,163,0.28));
+      overflow: visible;
     }
 
-    #hourglass-svg.finished { animation: hg-wiggle 0.45s ease-in-out 3; }
+    #hourglass-svg.finished {
+      animation: hg-wiggle 0.45s ease-in-out 3;
+    }
+    #hourglass-svg.urgent-glow {
+      filter: drop-shadow(0 6px 22px rgba(255,107,107,0.45));
+    }
     @keyframes hg-wiggle {
       0%,100% { transform: rotate(0deg); }
-      25%      { transform: rotate(-9deg); }
-      75%      { transform: rotate(9deg); }
+      25%     { transform: rotate(-9deg); }
+      75%     { transform: rotate(9deg); }
+    }
+
+    /* ── SAND PARTICLES ── */
+    @keyframes sand-fall {
+      0%   { opacity: 0;   transform: translateY(0px); }
+      12%  { opacity: 0.9; }
+      100% { opacity: 0;   transform: translateY(52px); }
+    }
+    .sp { animation: sand-fall 0.55s ease-in infinite; }
+    .sp:nth-child(1) { animation-delay: 0.00s; }
+    .sp:nth-child(2) { animation-delay: 0.11s; }
+    .sp:nth-child(3) { animation-delay: 0.22s; }
+    .sp:nth-child(4) { animation-delay: 0.33s; }
+    .sp:nth-child(5) { animation-delay: 0.44s; }
+    .sp:nth-child(6) { animation-delay: 0.06s; }
+    .sp:nth-child(7) { animation-delay: 0.17s; }
+    .sp:nth-child(8) { animation-delay: 0.28s; }
+    .sp:nth-child(9) { animation-delay: 0.39s; }
+
+    /* ── COUNTDOWN WITH RING ── */
+    #countdown-wrap {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      width: 130px; height: 130px;
+    }
+
+    #progress-ring {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      transform: rotate(-90deg);
+    }
+    .ring-track {
+      fill: none;
+      stroke: rgba(78,204,163,0.14);
+      stroke-width: 7;
+    }
+    #progress-arc {
+      fill: none;
+      stroke: #4ecca3;
+      stroke-width: 7;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.28s linear, stroke 0.6s ease;
     }
 
     #countdown {
-      font-size: 3.6rem; font-weight: 700;
+      font-size: 2.55rem; font-weight: 700;
       font-variant-numeric: tabular-nums;
-      letter-spacing: 2px; color: #4ecca3;
+      letter-spacing: 2px;
+      color: #4ecca3;
+      position: relative; z-index: 1;
+      text-shadow: 0 0 18px rgba(78,204,163,0.45);
+      transition: color 0.5s, text-shadow 0.5s;
     }
-    #countdown.urgent  { color: #ff6b6b; animation: pulse .5s infinite alternate; }
-    #countdown.done    { color: #ff6b6b; animation: none; }
-    @keyframes pulse { from { opacity: 1; } to { opacity: .35; } }
+    #countdown.urgent {
+      color: #ff6b6b;
+      text-shadow: 0 0 18px rgba(255,107,107,0.55);
+      animation: pulse .5s infinite alternate;
+    }
+    #countdown.done {
+      color: #ff6b6b;
+      text-shadow: 0 0 18px rgba(255,107,107,0.55);
+      animation: none;
+    }
+    @keyframes pulse { from { opacity: 1; } to { opacity: .3; } }
 
     /* ── CONTROLS ── */
     #controls { display: flex; gap: 14px; justify-content: center; }
@@ -118,11 +199,27 @@
       font-size: 1.1rem; font-family: inherit;
       cursor: pointer; transition: transform .15s, box-shadow .15s;
     }
-    .btn:active { transform: scale(.96); }
-    .btn-gold { background: linear-gradient(135deg,#f7971e,#ffd200); color: #1a1a00; font-weight: 700; }
-    .btn-gold:hover:not(:disabled) { box-shadow: 0 4px 20px #ffd20066; transform: translateY(-2px); }
-    .btn-gold:disabled { background: linear-gradient(135deg,#a0a0a0,#c8c8c8); color: #555; cursor: not-allowed; opacity: 0.6; transform: none; box-shadow: none; }
-    .btn-outline { background: transparent; border: 2px solid var(--btn-outline-border); color: var(--btn-outline-color); }
+    .btn:active { transform: scale(.96) !important; }
+
+    .btn-gold {
+      background: linear-gradient(135deg,#f7971e,#ffd200);
+      color: #1a1a00; font-weight: 700;
+      box-shadow: 0 4px 22px rgba(255,210,0,0.32);
+    }
+    .btn-gold:hover:not(:disabled) {
+      box-shadow: 0 6px 30px rgba(255,210,0,0.55);
+      transform: translateY(-2px);
+    }
+    .btn-gold:disabled {
+      background: linear-gradient(135deg,#a0a0a0,#c8c8c8);
+      color: #555; cursor: not-allowed; opacity: 0.6;
+      transform: none; box-shadow: none;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--btn-outline-border);
+      color: var(--btn-outline-color);
+    }
     .btn-outline:hover { border-color: #ffd200; color: #f7971e; }
   </style>
 </head>
@@ -136,79 +233,135 @@
 </header>
 
 <main id="main">
+  <div class="card">
 
-  <div id="duration-picker">
-    <button class="dur-btn" data-secs="60">60 שנ׳</button>
-    <button class="dur-btn" data-secs="90">90 שנ׳</button>
-    <button class="dur-btn" data-secs="120">120 שנ׳</button>
-    <button class="dur-btn" data-secs="180">180 שנ׳</button>
+    <div id="duration-picker">
+      <button class="dur-btn" data-secs="60">60 שנ׳</button>
+      <button class="dur-btn" data-secs="90">90 שנ׳</button>
+      <button class="dur-btn" data-secs="120">120 שנ׳</button>
+      <button class="dur-btn" data-secs="180">180 שנ׳</button>
+    </div>
+
+    <div id="hourglass-wrap">
+
+      <svg id="hourglass-svg" viewBox="0 0 100 180" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sand-grad-top" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#f7971e"/>
+            <stop offset="100%" stop-color="#ffd200"/>
+          </linearGradient>
+          <linearGradient id="sand-grad-bot" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%"   stop-color="#f7971e"/>
+            <stop offset="100%" stop-color="#ffd200"/>
+          </linearGradient>
+          <linearGradient id="frame-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#6ee7c7"/>
+            <stop offset="50%"  stop-color="#4ecca3"/>
+            <stop offset="100%" stop-color="#2fb89a"/>
+          </linearGradient>
+          <filter id="pinch-glow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <clipPath id="top-clip">
+            <polygon points="9,7 91,7 50,90"/>
+          </clipPath>
+          <clipPath id="bottom-clip">
+            <polygon points="9,173 91,173 50,90"/>
+          </clipPath>
+        </defs>
+
+        <!-- Glass tints -->
+        <polygon points="9,7 91,7 50,90"    fill="rgba(78,204,163,0.06)"/>
+        <polygon points="9,173 91,173 50,90" fill="rgba(78,204,163,0.06)"/>
+
+        <!-- Sand fills -->
+        <rect id="top-sand"    x="0" y="7"   width="100" height="83"
+              clip-path="url(#top-clip)"    fill="url(#sand-grad-top)"/>
+        <rect id="bottom-sand" x="0" y="173" width="100" height="0"
+              clip-path="url(#bottom-clip)" fill="url(#sand-grad-bot)"/>
+
+        <!-- Falling sand particles -->
+        <g id="sand-particles" style="display:none"></g>
+
+        <!-- Glass shine lines -->
+        <line x1="17" y1="18" x2="44" y2="83"
+              stroke="rgba(255,255,255,0.13)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="21" y1="18" x2="46" y2="76"
+              stroke="rgba(255,255,255,0.07)" stroke-width="1.5" stroke-linecap="round"/>
+
+        <!-- Frame -->
+        <path d="M 9,7 L 91,7 L 50,90 L 91,173 L 9,173 L 50,90 Z"
+              fill="none" stroke="url(#frame-grad)" stroke-width="3" stroke-linejoin="round"/>
+        <!-- Caps -->
+        <line x1="5"  y1="7"   x2="95" y2="7"   stroke="url(#frame-grad)" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="5"  y1="173" x2="95" y2="173" stroke="url(#frame-grad)" stroke-width="5.5" stroke-linecap="round"/>
+
+        <!-- Pinch-point glow dot -->
+        <circle id="pinch-dot" cx="50" cy="90" r="2.5"
+                fill="rgba(255,210,0,0.7)" filter="url(#pinch-glow)"/>
+      </svg>
+
+      <div id="countdown-wrap">
+        <svg id="progress-ring" viewBox="0 0 130 130">
+          <circle class="ring-track" cx="65" cy="65" r="56"/>
+          <circle id="progress-arc"  cx="65" cy="65" r="56"
+                  stroke-dasharray="351.86" stroke-dashoffset="0"/>
+        </svg>
+        <div id="countdown">2:00</div>
+      </div>
+
+    </div>
+
+    <div id="controls">
+      <button id="btn-toggle" class="btn btn-gold"    onclick="toggleTimer()">התחל</button>
+      <button id="btn-reset"  class="btn btn-outline" onclick="resetTimer()">אפס</button>
+    </div>
+
   </div>
-
-  <div id="hourglass-wrap">
-    <svg id="hourglass-svg" viewBox="0 0 100 180" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <clipPath id="top-clip">
-          <polygon points="8,6 92,6 50,90"/>
-        </clipPath>
-        <clipPath id="bottom-clip">
-          <polygon points="8,174 92,174 50,90"/>
-        </clipPath>
-      </defs>
-
-      <!-- empty triangle tints -->
-      <polygon points="8,6 92,6 50,90"    fill="rgba(78,204,163,0.07)"/>
-      <polygon points="8,174 92,174 50,90" fill="rgba(78,204,163,0.07)"/>
-
-      <!-- top sand -->
-      <rect id="top-sand"    x="0" y="6"   width="100" height="84" clip-path="url(#top-clip)"    fill="#ffd200"/>
-      <!-- bottom sand -->
-      <rect id="bottom-sand" x="0" y="174" width="100" height="0"  clip-path="url(#bottom-clip)" fill="#ffd200"/>
-
-      <!-- sand stream (visible while running) -->
-      <rect id="sand-stream" x="47.5" y="86" width="5" height="8" rx="2.5" fill="#ffd200" opacity="0"/>
-
-      <!-- frame -->
-      <path d="M 8,6 L 92,6 L 50,90 L 92,174 L 8,174 L 50,90 Z"
-            fill="none" stroke="#4ecca3" stroke-width="3" stroke-linejoin="round"/>
-      <line x1="5"  y1="6"   x2="95" y2="6"   stroke="#4ecca3" stroke-width="5"  stroke-linecap="round"/>
-      <line x1="5"  y1="174" x2="95" y2="174" stroke="#4ecca3" stroke-width="5"  stroke-linecap="round"/>
-    </svg>
-
-    <div id="countdown">2:00</div>
-  </div>
-
-  <div id="controls">
-    <button id="btn-toggle" class="btn btn-gold"    onclick="toggleTimer()">התחל</button>
-    <button id="btn-reset"  class="btn btn-outline" onclick="resetTimer()">אפס</button>
-  </div>
-
 </main>
 
 <script>
 // ── Constants ──────────────────────────────────────────────────────────────
-const STORAGE_KEY    = 'companion_timer_duration';
-const DEFAULT_SECS   = 120;
-const URGENT_THRESH  = 10;   // seconds
-const TOP_FULL_H     = 84;   // px in SVG units — full height of each triangle
-const BOTTOM_FULL_Y  = 174;
-const TOP_BASE_Y     = 90;
+const STORAGE_KEY   = 'companion_timer_duration';
+const DEFAULT_SECS  = 120;
+const URGENT_THRESH = 10;
+const TOP_FULL_H    = 83;    // SVG units — height of each sand triangle
+const TOP_BASE_Y    = 90;
+const BOTTOM_FULL_Y = 173;
+const RING_R        = 56;
+const RING_CIRC     = 2 * Math.PI * RING_R;  // ≈ 351.86
+
+// ── Sand particles ─────────────────────────────────────────────────────────
+const particleGroup = document.getElementById('sand-particles');
+// x offsets from the pinch center (50), alternating sizes
+const P_OFFSETS = [-2, 1, -0.5, 2, -1.5, 0.5, -1, 1.5, 0];
+P_OFFSETS.forEach((dx, i) => {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  el.setAttribute('cx', 50 + dx);
+  el.setAttribute('cy', 90);
+  el.setAttribute('r', i % 3 === 0 ? 1.3 : 0.9);
+  el.setAttribute('fill', '#ffd200');
+  el.classList.add('sp');
+  particleGroup.appendChild(el);
+});
 
 // ── State ──────────────────────────────────────────────────────────────────
 let totalSecs  = parseInt(localStorage.getItem(STORAGE_KEY) || DEFAULT_SECS, 10);
 let remaining  = totalSecs;
 let running    = false;
-let elapsed    = 0;       // ms accumulated before the current run started
-let startTime  = null;    // Date.now() when current run began
+let elapsed    = 0;
+let startTime  = null;
 let handle     = null;
 
 // ── DOM ────────────────────────────────────────────────────────────────────
 const topSand      = document.getElementById('top-sand');
 const bottomSand   = document.getElementById('bottom-sand');
-const sandStream   = document.getElementById('sand-stream');
 const countdownEl  = document.getElementById('countdown');
 const btnToggle    = document.getElementById('btn-toggle');
 const btnReset     = document.getElementById('btn-reset');
 const hourglassSvg = document.getElementById('hourglass-svg');
+const progressArc  = document.getElementById('progress-arc');
 
 // ── Duration picker ────────────────────────────────────────────────────────
 document.querySelectorAll('.dur-btn').forEach(btn => {
@@ -238,24 +391,33 @@ function formatTime(secs) {
 
 function render() {
   const progress = totalSecs > 0 ? 1 - remaining / totalSecs : 1;
+  const urgent   = remaining > 0 && remaining <= URGENT_THRESH;
+  const done     = remaining === 0;
 
-  // Countdown
+  // Countdown text
   countdownEl.textContent = formatTime(remaining);
-  countdownEl.classList.toggle('urgent', remaining > 0 && remaining <= URGENT_THRESH);
-  countdownEl.classList.toggle('done',   remaining === 0);
+  countdownEl.classList.toggle('urgent', urgent);
+  countdownEl.classList.toggle('done',   done);
 
-  // Top sand: full at progress=0, empty at progress=1
+  // Top sand: fills from bottom of top-triangle (y=90) upward
   const topH = Math.max(0, TOP_FULL_H * (1 - progress));
   topSand.setAttribute('height', topH);
   topSand.setAttribute('y', TOP_BASE_Y - topH);
 
-  // Bottom sand: empty at progress=0, full at progress=1
+  // Bottom sand: fills from bottom of bottom-triangle (y=173) upward
   const botH = Math.min(TOP_FULL_H, TOP_FULL_H * progress);
   bottomSand.setAttribute('height', botH);
   bottomSand.setAttribute('y', BOTTOM_FULL_Y - botH);
 
-  // Sand stream
-  sandStream.setAttribute('opacity', running && remaining > 0 ? '0.9' : '0');
+  // Sand particles — only while running and time remains
+  particleGroup.style.display = (running && remaining > 0) ? '' : 'none';
+
+  // Progress ring
+  progressArc.setAttribute('stroke-dashoffset', RING_CIRC * progress);
+  progressArc.setAttribute('stroke', done || urgent ? '#ff6b6b' : progress >= 0.75 ? '#ffd200' : '#4ecca3');
+
+  // Hourglass urgent glow
+  hourglassSvg.classList.toggle('urgent-glow', urgent || done);
 }
 
 // ── Tick ───────────────────────────────────────────────────────────────────
@@ -271,7 +433,6 @@ function toggleTimer() {
   if (remaining === 0) return;
 
   if (running) {
-    // Pause
     elapsed += Date.now() - startTime;
     startTime = null;
     clearInterval(handle); handle = null;
@@ -280,7 +441,6 @@ function toggleTimer() {
     setDurBtnsDisabled(false);
     render();
   } else {
-    // Start / Resume
     startTime = Date.now();
     running   = true;
     handle    = setInterval(tick, 250);
@@ -296,7 +456,7 @@ function resetTimer() {
   startTime = null;
   elapsed   = 0;
   remaining = totalSecs;
-  hourglassSvg.classList.remove('finished');
+  hourglassSvg.classList.remove('finished', 'urgent-glow');
   btnToggle.textContent = 'התחל';
   btnToggle.disabled    = false;
   setDurBtnsDisabled(false);
@@ -333,7 +493,7 @@ function playBuzzer() {
     beep(880,  0,    0.22);
     beep(880,  0.32, 0.22);
     beep(1046, 0.64, 0.55);
-  } catch (_) { /* ignore if audio unavailable */ }
+  } catch (_) { }
 }
 
 // ── Header height compensation ─────────────────────────────────────────────

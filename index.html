@@ -761,7 +761,7 @@
 </div>
 
 <script>
-const VERSION = '0.30.0';
+const VERSION = '0.31.0';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1610,13 +1610,22 @@ function typewriterReveal(el, word, delay, callback) {
   setTimeout(next, 0);
 }
 
-function getSuggestions(tiles, catKey) {
-  const words = (CATEGORIES[catKey]?.words || []).filter(w => canSpell(w, tiles));
+function getSuggestions(tiles, catKey, excludeWord) {
+  const excl = norm(excludeWord || '');
+  const words = (CATEGORIES[catKey]?.words || [])
+    .filter(w => canSpell(w, tiles))
+    .filter(w => norm(w) !== excl);
   if (words.length === 0) return [];
-  words.sort((a, b) => a.length - b.length);
-  const short = words[0];
-  const longer = words.filter(w => w.length > short.length).sort((a, b) => b.length - a.length)[0] || null;
-  return longer ? [short, longer] : [short];
+
+  // Pick one from the top-3 longest (good hint), and one random from the rest
+  const byLen = [...words].sort((a, b) => b.length - a.length);
+  const topPool = byLen.slice(0, Math.min(3, byLen.length));
+  const w1 = topPool[Math.floor(Math.random() * topPool.length)];
+
+  const rest = words.filter(w => norm(w) !== norm(w1));
+  if (rest.length === 0) return [w1];
+  const w2 = rest[Math.floor(Math.random() * rest.length)];
+  return [w2, w1];
 }
 
 async function endRound(playerWord, warning) {
@@ -1675,21 +1684,19 @@ async function endRound(playerWord, warning) {
   document.getElementById('r-cpu-tiles').innerHTML = '';
 
   const suggestEl = document.getElementById('r-suggestions');
-  if (!pw) {
-    const sugs = getSuggestions(state.playerTiles, state.currentCatKey);
-    if (sugs.length > 0) {
-      suggestEl.textContent = '';
-      suggestEl.append('💡 יכולת לשחק: ');
-      sugs.forEach((w, i) => {
-        if (i > 0) suggestEl.append(' או ');
-        const strong = document.createElement('strong');
-        strong.textContent = norm(w).split(' ').map(finalForm).join(' ');
-        suggestEl.appendChild(strong);
-      });
-      suggestEl.classList.add('visible');
-    } else {
-      suggestEl.classList.remove('visible');
-    }
+  
+  // Show suggestions based on player's tiles and category
+  const sugs = getSuggestions(state.playerTiles, state.currentCatKey, pw);
+  if (sugs.length > 0) {
+    suggestEl.textContent = '';
+    suggestEl.append('💡 יכולת לשחק: ');
+    sugs.forEach((w, i) => {
+      if (i > 0) suggestEl.append(' או ');
+      const strong = document.createElement('strong');
+      strong.textContent = norm(w).split(' ').map(finalForm).join(' ');
+      suggestEl.appendChild(strong);
+    });
+    suggestEl.classList.add('visible');
   } else {
     suggestEl.classList.remove('visible');
   }

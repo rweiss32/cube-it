@@ -5,6 +5,10 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.31.0] 2026-04-23 — always show word suggestions after each round
+
+- Suggestions (💡 יכולת לשחק) now appear after every round, regardless of whether the player submitted a word
+
 ## [0.30.0] 2026-04-23 — companion timer page for physical game players
 
 - New `companion.html` page with an animated SVG hourglass timer (configurable: 60 / 90 / 120 / 180 sec, default 120)

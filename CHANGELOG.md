@@ -5,6 +5,13 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.35.0] 2026-04-24 — companion hourglass redesign with animations and progress ring
+
+- Gradient sand fills, gradient SVG frame, glass shine reflections and glowing pinch-point dot
+- Animated falling sand particles at the pinch point while timer runs
+- Circular progress ring around countdown (teal → gold → red as time runs low)
+- Glass-morphism card, backdrop-blur header, duration buttons fit one line on mobile
+
 ## [0.34.0] 2026-04-24 — AI word validation with animated indicator and multi-word support
 
 - Words not in the category list are validated by AI (Gemma via Vercel proxy), including multi-word terms

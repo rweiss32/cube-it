@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.32.1] 2026-04-23 — enforce joker limits for CPU tile draw (same caps as player)
+
+- CPU now draws tiles with the same per-round joker caps as the player (vowel ☆ and regular ★ limits enforced)
+- Fixes a bug where the CPU could receive an unrestricted number of jokers from the remaining pool
+
 ## [0.32.0] 2026-04-23 — vowel joker tile redesigned as 2×2 letter grid (א ה / ו י) with vertical divider; fix double-joker resolution cancellation bug
 
 - Vowel joker tile (☆) now displays all 4 vowel letters (א ה / ו י) in a 2×2 grid with a thin vertical divider, replacing the two-line text layout

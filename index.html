@@ -784,7 +784,7 @@
 </div>
 
 <script>
-const VERSION = '0.32.0';
+const VERSION = '0.32.1';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1044,7 +1044,25 @@ function nextRound() {
     }
   }
   state.playerTiles = playerTiles;
-  state.cpuTiles    = pool.splice(0, 8);
+
+  // Draw CPU tiles with the same joker limits as the player
+  const cpuTiles = [];
+  {
+    const lim = JOKER_LIMITS[state.round - 1] || { vowel: 0, regular: 0, total: 0 };
+    const counts = {};
+    for (let i = 0; i < pool.length && cpuTiles.length < 8; i++) {
+      const tile = pool[i];
+      const isJoker = tile === '★' || tile === '☆';
+      const indivMax = tile === '☆' ? lim.vowel : tile === '★' ? lim.regular : 2;
+      const jokersSoFar = isJoker ? cpuTiles.filter(t => t === '★' || t === '☆').length : 0;
+      if ((counts[tile] || 0) < indivMax && (!isJoker || jokersSoFar < lim.total)) {
+        counts[tile] = (counts[tile] || 0) + 1;
+        cpuTiles.push(tile);
+        pool.splice(i--, 1);
+      }
+    }
+  }
+  state.cpuTiles    = cpuTiles;
   state.selectedIndices = [];
 
   // Pick category (avoid repeats if possible)

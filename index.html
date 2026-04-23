@@ -253,7 +253,7 @@
     .table-word-tile.player { background: #f5e6c8; color: #2a1a00; box-shadow: 0 2px 0 #8b6914; }
     .table-word-tile.cpu    { background: #e94560; color: #fff;    box-shadow: 0 2px 0 #a02040; }
     .table-word-tile.joker        { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
-    .table-word-tile.vowel-joker  { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: 0.5rem; line-height: 1.15; flex-direction: column; box-shadow: 0 2px 0 #1565a0; }
+    .table-word-tile.vowel-joker  { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: 0.68rem; line-height: 1.15; flex-direction: column; box-shadow: 0 2px 0 #1565a0; }
     .table-word-tile:not(:disabled):not(.taken):hover  { transform: translateY(-2px); border-color: #4ecca3; }
     .table-word-tile:not(:disabled):not(.taken):active { transform: translateY(1px); }
     .table-word-tile.taken, .table-word-tile:disabled  { opacity: 0.28; cursor: default; }
@@ -324,7 +324,7 @@
     .tile.joker.selected { background: #4ecca3; }
     .tile.vowel-joker {
       background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e;
-      font-size: min(0.62rem, calc((100vw - 116px) / 8 * 0.29));
+      font-size: min(0.82rem, calc((100vw - 116px) / 8 * 0.38));
       line-height: 1.2; flex-direction: column; gap: 0;
     }
     .tile.vowel-joker.selected { background: #f7971e; color: #1a1a00; }
@@ -376,7 +376,7 @@
     }
     .word-tile:hover { background: #ff6b6b; color: #fff; }
     .word-tile.from-bank { background: #f7971e; color: #1a1a00; box-shadow: 0 3px 0 #b06000; }
-    .word-tile.vowel-joker { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: min(0.62rem, calc((100vw - 104px) / 8.5 * 0.29)); line-height: 1.2; flex-direction: column; }
+    .word-tile.vowel-joker { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: min(0.82rem, calc((100vw - 104px) / 8.5 * 0.38)); line-height: 1.2; flex-direction: column; }
     .word-tile.vowel-joker:hover { background: linear-gradient(135deg,#6ed8b5,#42a5f5); color: #0a1a2e; }
     .word-tile-space {
       width: min(28px, calc((100vw - 104px) / 17));
@@ -448,7 +448,7 @@
     }
     .jwt-normal { background: #f5e6c8; color: #2a1a00; }
     .jwt-joker  { background: #8048d0; color: #fff; animation: jokerpulse 1s infinite alternate; }
-    .jwt-joker.jwt-vowel { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: 0.5rem; line-height: 1.15; flex-direction: column; }
+    .jwt-joker.jwt-vowel { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: 0.68rem; line-height: 1.15; flex-direction: column; }
     .jwt-assigned { background: #4ecca3; color: #0a1a14; }
     .jwt-space  { background: transparent; color: #8a8a8a; font-size: 0.9rem; min-width: 16px; }
     @keyframes jokerpulse { from { opacity:1; } to { opacity:.5; } }
@@ -1519,7 +1519,8 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
       const btn = document.createElement('button');
       btn.className = 'letter-pick-btn' + (isVowelJoker ? ' vowel-pick' : '');
       btn.textContent = letter;
-      btn.onclick = () => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
         if (onOutside) { modal.removeEventListener('click', onOutside); onOutside = null; }
         document.removeEventListener('keydown', onJokerKey);
         _jokerResolve = null;

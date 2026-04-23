@@ -5,6 +5,10 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.33.1] 2026-04-23 — add animals words to in-nature category
+
+- Added animal-related words to the in-nature category word list
+
 ## [0.33.0] 2026-04-23 — add Merge button and current file display to words editor tool
 
 - Words editor now shows the currently open filename in the header

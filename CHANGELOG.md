@@ -5,6 +5,10 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.34.0] 2026-04-23 — advance minor version only
+
+- Version bump to 0.34.0 (minor version advance)
+
 ## [0.33.0] 2026-04-23 — add Merge button and current file display to words editor tool
 
 - Words editor now shows the currently open filename in the header

@@ -114,6 +114,23 @@
     .confirm-btns { display: flex; gap: 10px; justify-content: center; }
     .btn-danger { background: #e94560; color: white; }
     .btn-danger:hover { background: #c73050; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+    #summary-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    #summary-overlay.visible { display: flex; }
+    #summary-box {
+      background: white; border-radius: 10px;
+      padding: 24px 28px; max-width: 360px; width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+    #summary-title { font-size: 1rem; font-weight: 700; color: #2a2a50; margin-bottom: 14px; }
+    #summary-list { list-style: none; margin-bottom: 18px; display: flex; flex-direction: column; gap: 6px; }
+    #summary-list li { font-size: 0.95rem; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
+    #summary-list li .sum-num { font-weight: 700; font-size: 1.1rem; min-width: 2.5ch; text-align: left; }
 
     .add-cat-area { padding: 10px; border-top: 1px solid #ccc; display: flex; flex-direction: column; gap: 6px; }
     #add-cat-input {
@@ -186,6 +203,8 @@
   <h1>🎲 קוביאות — עורך מילים <span id="version-display" class="version-text"></span></h1>
   
   <button class="btn btn-primary" onclick="openFile()">📂 פתח קובץ</button>
+  <button class="btn btn-secondary" id="btn-merge" onclick="mergeFile()" disabled>⇄ מיזוג</button>
+  <span id="current-file" style="font-size:0.85rem;color:#ccc;font-style:italic;"></span>
   <span id="stats" style="font-size:0.8rem;color:#aaa;"></span>
   <span id="status"></span>
 </header>
@@ -224,6 +243,17 @@
   </div>
 </div>
 
+<!-- Summary dialog -->
+<div id="summary-overlay">
+  <div id="summary-box">
+    <p id="summary-title"></p>
+    <ul id="summary-list"></ul>
+    <div class="confirm-btns">
+      <button class="btn btn-primary" id="summary-ok">אישור</button>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm dialog -->
 <div id="confirm-overlay">
   <div id="confirm-box">
@@ -236,7 +266,7 @@
 </div>
 
 <script>
-const APP_VERSION = "1.0";
+const APP_VERSION = "1.1";
 'use strict';
 
 // ── Hebrew utils ──────────────────────────────────────────────────────────
@@ -255,6 +285,14 @@ let selectedCat = null;
 let addingCat   = false;
 
 // ── File I/O ──────────────────────────────────────────────────────────────
+function enableMerge() {
+  document.getElementById('btn-merge').disabled = false;
+}
+
+function setCurrentFile(name) {
+  document.getElementById('current-file').textContent = name;
+}
+
 async function openFile() {
   try {
     const pickerOpts = { types: [{ description: 'Text files', accept: { 'text/plain': ['.txt'] } }] };
@@ -265,7 +303,9 @@ async function openFile() {
     document.getElementById('splash').style.display = 'none';
     document.getElementById('main').style.display = 'flex';
     renderCatList();
-    setStatus('✓ ' + file.name);
+    enableMerge();
+    setCurrentFile(file.name);
+    setStatus('✓ נפתח');
   } catch (e) {
     if (e.name !== 'AbortError') setStatus('❌ שגיאה בפתיחת הקובץ');
   }
@@ -284,8 +324,8 @@ async function saveFile() {
 }
 
 // ── Parse / Serialize ─────────────────────────────────────────────────────
-function parseCategories(text) {
-  categories = [];
+function parseToArray(text) {
+  const result = [];
   let current = null;
   for (const raw of text.split(/\r?\n/)) {
     const line = raw.trim();
@@ -295,7 +335,7 @@ function parseCategories(text) {
       const name = nameRaw.trim();
       if (!name) continue;
       current = { name, hint: hintParts.join('|').trim(), words: [], seen: new Set() };
-      categories.push(current);
+      result.push(current);
     } else if (current) {
       for (const w of line.split(',').map(w => w.trim()).filter(Boolean)) {
         const word = norm(w).split(' ').map(finalForm).join(' ');
@@ -304,6 +344,11 @@ function parseCategories(text) {
       }
     }
   }
+  return result;
+}
+
+function parseCategories(text) {
+  categories = parseToArray(text);
 }
 
 function serialize() {
@@ -661,7 +706,9 @@ document.addEventListener('drop', async e => {
     document.getElementById('splash').style.display = 'none';
     document.getElementById('main').style.display = 'flex';
     renderCatList();
-    setStatus('⚠️ ' + file.name + ' (קריאה בלבד — גישת כתיבה לא זמינה)');
+    enableMerge();
+    setCurrentFile(file.name + ' (קריאה בלבד)', file.webkitRelativePath || file.name);
+    setStatus('⚠️ גישת כתיבה לא זמינה');
     return;
   }
   fileHandle = handle;
@@ -670,8 +717,76 @@ document.addEventListener('drop', async e => {
   document.getElementById('splash').style.display = 'none';
   document.getElementById('main').style.display = 'flex';
   renderCatList();
-  setStatus('✓ ' + file.name);
+  enableMerge();
+  setCurrentFile(file.name);
+  setStatus('✓ נפתח');
 });
+
+// ── Merge ─────────────────────────────────────────────────────────────────
+async function mergeFile() {
+  try {
+    const [mergeHandle] = await window.showOpenFilePicker({
+      types: [{ description: 'Text files', accept: { 'text/plain': ['.txt'] } }]
+    });
+    const file = await mergeHandle.getFile();
+    const incoming = parseToArray(await file.text());
+
+    let newWords = 0, ignoredWords = 0, newCategories = 0;
+
+    for (const inCat of incoming) {
+      const existing = categories.find(c => c.name === inCat.name);
+      if (existing) {
+        for (const word of inCat.words) {
+          const key = norm(word);
+          if (existing.seen.has(key)) {
+            ignoredWords++;
+          } else {
+            existing.seen.add(key);
+            existing.words.push(word);
+            newWords++;
+          }
+        }
+      } else {
+        categories.push(inCat);
+        newWords += inCat.words.length;
+        newCategories++;
+      }
+    }
+
+    await saveFile();
+    renderCatList();
+    if (selectedCat) renderWords();
+    showSummaryDialog(file.name, newCategories, newWords, ignoredWords);
+  } catch (e) {
+    if (e.name !== 'AbortError') setStatus('❌ שגיאה במיזוג');
+  }
+}
+
+function showSummaryDialog(fileName, newCategories, newWords, ignoredWords) {
+  document.getElementById('summary-title').textContent = `מיזוג: ${fileName}`;
+  const list = document.getElementById('summary-list');
+  list.innerHTML = '';
+  const rows = [
+    { num: newCategories, label: 'קטגוריות חדשות',    color: '#4ecca3' },
+    { num: newWords,      label: 'מילים חדשות שנוספו', color: '#4ecca3' },
+    { num: ignoredWords,  label: 'מילים שכבר קיימות (דולגו)', color: '#aaa' },
+  ];
+  for (const { num, label, color } of rows) {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="sum-num" style="color:${color}">${num}</span> ${label}`;
+    list.appendChild(li);
+  }
+  const overlay = document.getElementById('summary-overlay');
+  overlay.classList.add('visible');
+  function close() {
+    overlay.classList.remove('visible');
+    document.getElementById('summary-ok').removeEventListener('click', close);
+    overlay.removeEventListener('click', onOverlay);
+  }
+  function onOverlay(e) { if (e.target === overlay) close(); }
+  document.getElementById('summary-ok').addEventListener('click', close);
+  overlay.addEventListener('click', onOverlay);
+}
 
 // ── API check ─────────────────────────────────────────────────────────────
 if (!window.showOpenFilePicker) {

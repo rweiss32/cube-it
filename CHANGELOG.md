@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.33.0] 2026-04-23 — add Merge button and current file display to words editor tool
+
+- Words editor now shows the currently open filename in the header
+- New "Merge" button lets you merge a second `.txt` file into the loaded one — adds new words/categories, skips duplicates, shows a summary
+- Merge button is disabled until a file is loaded
+
 ## [0.32.1] 2026-04-23 — enforce joker limits for CPU tile draw (same caps as player)
 
 - CPU now draws tiles with the same per-round joker caps as the player (vowel ☆ and regular ★ limits enforced)

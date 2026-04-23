@@ -1008,6 +1008,23 @@ function cpuBestWord(tiles, catKey) {
 //  GAME FLOW
 // ══════════════════════════════════════════════
 
+function drawHand(pool, round) {
+  const lim = JOKER_LIMITS[round - 1] || { vowel: 0, regular: 0, total: 0 };
+  const hand = [], counts = {};
+  for (let i = 0; i < pool.length && hand.length < 8; i++) {
+    const tile = pool[i];
+    const isJoker = tile === '★' || tile === '☆';
+    const indivMax = tile === '☆' ? lim.vowel : tile === '★' ? lim.regular : 2;
+    const jokersSoFar = isJoker ? hand.filter(t => t === '★' || t === '☆').length : 0;
+    if ((counts[tile] || 0) < indivMax && (!isJoker || jokersSoFar < lim.total)) {
+      counts[tile] = (counts[tile] || 0) + 1;
+      hand.push(tile);
+      pool.splice(i--, 1);
+    }
+  }
+  return hand;
+}
+
 function startGame() {
   initState();
   soundStart();
@@ -1024,45 +1041,11 @@ function nextRound() {
     return;
   }
 
-  // Draw tiles — player hand: max 2 of any letter; jokers capped by round limits
+  // Draw tiles — player and CPU hands; jokers capped by round limits
   const pool = shuffle([...LETTER_POOL]);
   const debugParam = new URLSearchParams(location.search).get('tiles');
-  const playerTiles = debugParam ? [...debugParam].slice(0, 8) : [];
-  if (!debugParam) {
-    const lim = JOKER_LIMITS[state.round - 1] || { vowel: 0, regular: 0, total: 0 };
-    const counts = {};
-    for (let i = 0; i < pool.length && playerTiles.length < 8; i++) {
-      const tile = pool[i];
-      const isJoker = tile === '★' || tile === '☆';
-      const indivMax = tile === '☆' ? lim.vowel : tile === '★' ? lim.regular : 2;
-      const jokersSoFar = isJoker ? playerTiles.filter(t => t === '★' || t === '☆').length : 0;
-      if ((counts[tile] || 0) < indivMax && (!isJoker || jokersSoFar < lim.total)) {
-        counts[tile] = (counts[tile] || 0) + 1;
-        playerTiles.push(tile);
-        pool.splice(i--, 1);
-      }
-    }
-  }
-  state.playerTiles = playerTiles;
-
-  // Draw CPU tiles with the same joker limits as the player
-  const cpuTiles = [];
-  {
-    const lim = JOKER_LIMITS[state.round - 1] || { vowel: 0, regular: 0, total: 0 };
-    const counts = {};
-    for (let i = 0; i < pool.length && cpuTiles.length < 8; i++) {
-      const tile = pool[i];
-      const isJoker = tile === '★' || tile === '☆';
-      const indivMax = tile === '☆' ? lim.vowel : tile === '★' ? lim.regular : 2;
-      const jokersSoFar = isJoker ? cpuTiles.filter(t => t === '★' || t === '☆').length : 0;
-      if ((counts[tile] || 0) < indivMax && (!isJoker || jokersSoFar < lim.total)) {
-        counts[tile] = (counts[tile] || 0) + 1;
-        cpuTiles.push(tile);
-        pool.splice(i--, 1);
-      }
-    }
-  }
-  state.cpuTiles    = cpuTiles;
+  state.playerTiles = debugParam ? [...debugParam].slice(0, 8) : drawHand(pool, state.round);
+  state.cpuTiles    = drawHand(pool, state.round);
   state.selectedIndices = [];
 
   // Pick category (avoid repeats if possible)

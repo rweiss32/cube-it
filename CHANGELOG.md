@@ -5,6 +5,10 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.31.1] 2026-04-23 — fix: space button smaller with label
+
+- Space button reduced in size (120px × 32px) and now shows "space" text label
+
 ## [0.31.0] 2026-04-23 — always show word suggestions after each round
 
 - Suggestions (💡 יכולת לשחק) now appear after every round, regardless of whether the player submitted a word

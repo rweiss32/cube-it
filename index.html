@@ -336,21 +336,15 @@
     .north-area .tiles-row { gap: 4px; }
     .space-btn-row { width: 100%; margin-top: 8px; display: flex; justify-content: center; position: relative; z-index: 1; }
     .btn-space {
-      height: 42px; width: min(220px, 60%);
+      height: 32px; width: min(120px, 35%);
       background: #8ab4d8;
       border-radius: 8px; border: none;
-      font-family: inherit; font-size: 0;
+      font-family: inherit; font-size: 0.75rem; color: #2a3a4a; font-weight: 600;
+      letter-spacing: 1px;
       user-select: none; -webkit-user-select: none;
       cursor: pointer;
       box-shadow: 0 4px 0 #5a8aae;
       transition: transform .1s, box-shadow .1s, background .1s;
-      position: relative;
-    }
-    .btn-space::after {
-      content: ''; display: block;
-      width: 60px; height: 3px;
-      background: #7aa0bc; border-radius: 2px; opacity: 0.7;
-      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
     }
     .btn-space:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 7px 0 #7aa0bc; }
     .btn-space:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #7aa0bc; }
@@ -635,7 +629,7 @@
     </div>
   </div>
   <div class="space-btn-row">
-    <button class="btn-space" id="btn-space" onclick="insertSpace()" disabled aria-label="רווח"></button>
+    <button class="btn-space" id="btn-space" onclick="insertSpace()" disabled aria-label="רווח">רווח</button>
   </div>
   <div class="action-area">
     <div class="error-msg" id="g-error"></div>
@@ -761,7 +755,7 @@
 </div>
 
 <script>
-const VERSION = '0.31.0';
+const VERSION = '0.31.1';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════

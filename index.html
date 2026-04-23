@@ -252,7 +252,8 @@
     }
     .table-word-tile.player { background: #f5e6c8; color: #2a1a00; box-shadow: 0 2px 0 #8b6914; }
     .table-word-tile.cpu    { background: #e94560; color: #fff;    box-shadow: 0 2px 0 #a02040; }
-    .table-word-tile.joker  { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
+    .table-word-tile.joker        { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
+    .table-word-tile.vowel-joker  { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: 0.5rem; line-height: 1.15; flex-direction: column; box-shadow: 0 2px 0 #1565a0; }
     .table-word-tile:not(:disabled):not(.taken):hover  { transform: translateY(-2px); border-color: #4ecca3; }
     .table-word-tile:not(:disabled):not(.taken):active { transform: translateY(1px); }
     .table-word-tile.taken, .table-word-tile:disabled  { opacity: 0.28; cursor: default; }
@@ -321,6 +322,12 @@
     .tile.used { background: var(--tile-used-bg); color: var(--tile-used-color); cursor: default; box-shadow: 0 2px 0 var(--tile-used-shadow); }
     .tile.joker { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; }
     .tile.joker.selected { background: #4ecca3; }
+    .tile.vowel-joker {
+      background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e;
+      font-size: min(0.62rem, calc((100vw - 116px) / 8 * 0.29));
+      line-height: 1.2; flex-direction: column; gap: 0;
+    }
+    .tile.vowel-joker.selected { background: #f7971e; color: #1a1a00; }
     .tile-back {
       width: 22px; height: 22px;
       border-radius: 4px; flex-shrink: 0;
@@ -369,6 +376,8 @@
     }
     .word-tile:hover { background: #ff6b6b; color: #fff; }
     .word-tile.from-bank { background: #f7971e; color: #1a1a00; box-shadow: 0 3px 0 #b06000; }
+    .word-tile.vowel-joker { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: min(0.62rem, calc((100vw - 104px) / 8.5 * 0.29)); line-height: 1.2; flex-direction: column; }
+    .word-tile.vowel-joker:hover { background: linear-gradient(135deg,#6ed8b5,#42a5f5); color: #0a1a2e; }
     .word-tile-space {
       width: min(28px, calc((100vw - 104px) / 17));
       height: min(52px, calc((100vw - 104px) / 8.5));
@@ -439,6 +448,7 @@
     }
     .jwt-normal { background: #f5e6c8; color: #2a1a00; }
     .jwt-joker  { background: #8048d0; color: #fff; animation: jokerpulse 1s infinite alternate; }
+    .jwt-joker.jwt-vowel { background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e; font-size: 0.5rem; line-height: 1.15; flex-direction: column; }
     .jwt-assigned { background: #4ecca3; color: #0a1a14; }
     .jwt-space  { background: transparent; color: #8a8a8a; font-size: 0.9rem; min-width: 16px; }
     @keyframes jokerpulse { from { opacity:1; } to { opacity:.5; } }
@@ -454,6 +464,13 @@
       cursor: pointer; transition: all .1s;
     }
     .letter-pick-btn:hover { background: #8048d0; border-color: #a070f0; color: #fff; }
+    .letter-grid.vowel-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .letter-pick-btn.vowel-pick {
+      padding: 16px 4px; font-size: 1.5rem;
+      background: linear-gradient(135deg,#4ecca3,#2196f3); color: #0a1a2e;
+      box-shadow: 0 3px 0 #1565a0;
+    }
+    .letter-pick-btn.vowel-pick:hover { background: linear-gradient(135deg,#6ed8b5,#42a5f5); border-color: #4ecca3; color: #0a1a2e; box-shadow: 0 5px 0 #1565a0; transform: translateY(-2px); }
 
     /* ── PURCHASE CTA ── */
     .cta-box {
@@ -815,15 +832,28 @@ window.addEventListener('resize', syncBodyPadding);
 //  CONSTANTS
 // ══════════════════════════════════════════════
 
+// '☆' = vowel joker (א/ה/ו/י); '★' = regular joker (any letter)
+// אהוי removed as individual tiles — replaced by vowel jokers
+const VOWEL_LETTERS = ['א','ה','ו','י'];
+
+// Per-round joker caps: vowel☆ and regular★ individual maxes + optional combined total
+const JOKER_LIMITS = [
+  { vowel: 2, regular: 1, total: Infinity }, // round 1
+  { vowel: 1, regular: 1, total: Infinity }, // round 2
+  { vowel: 2, regular: 0, total: Infinity }, // round 3
+  { vowel: 1, regular: 0, total: Infinity }, // round 4
+  { vowel: 1, regular: 1, total: 1         }, // round 5 — at most 1 joker of any kind
+];
+
 const LETTER_POOL = [
-  ...Array(4).fill('א'), ...Array(3).fill('ב'), ...Array(2).fill('ג'),
-  ...Array(2).fill('ד'), ...Array(4).fill('ה'), ...Array(4).fill('ו'),
+  ...Array(3).fill('ב'), ...Array(2).fill('ג'),
+  ...Array(2).fill('ד'),
   ...Array(1).fill('ז'), ...Array(2).fill('ח'), ...Array(1).fill('ט'),
-  ...Array(4).fill('י'), ...Array(2).fill('כ'), ...Array(3).fill('ל'),
+  ...Array(2).fill('כ'), ...Array(3).fill('ל'),
   ...Array(3).fill('מ'), ...Array(3).fill('נ'), ...Array(2).fill('ס'),
   ...Array(1).fill('ע'), ...Array(2).fill('פ'), ...Array(1).fill('צ'),
   ...Array(2).fill('ק'), ...Array(3).fill('ר'), ...Array(3).fill('ש'),
-  ...Array(3).fill('ת'), ...Array(7).fill('★'),
+  ...Array(3).fill('ת'), ...Array(7).fill('★'), ...Array(16).fill('☆'),
 ];
 
 // Categories loaded from external categories.js
@@ -910,14 +940,20 @@ function canSpell(word, tiles) {
   const letters = [...norm(word)].filter(c => c !== ' ');
   if (letters.length < 2) return false;
   const avail = [...tiles];
-  let jokersNeeded = 0;
+  const unmatched = [];
   for (const ch of letters) {
     const idx = avail.indexOf(ch);
     if (idx !== -1) { avail.splice(idx, 1); }
-    else { jokersNeeded++; }
+    else { unmatched.push(ch); }
   }
-  const jokersAvail = avail.filter(t => t === '★').length;
-  return jokersNeeded <= jokersAvail;
+  let vowelJokers = avail.filter(t => t === '☆').length;
+  let regularJokers = avail.filter(t => t === '★').length;
+  for (const ch of unmatched) {
+    if (VOWEL_LETTERS.includes(ch) && vowelJokers > 0) { vowelJokers--; }
+    else if (regularJokers > 0) { regularJokers--; }
+    else { return false; }
+  }
+  return true;
 }
 
 function getUsedTileLetters(tiles, word) {
@@ -927,8 +963,15 @@ function getUsedTileLetters(tiles, word) {
   const usedIndices = new Set();
   for (const ch of letters) {
     const idx = avail.findIndex((t, i) => t === ch && !usedIndices.has(i));
-    if (idx !== -1) usedIndices.add(idx);
-    else {
+    if (idx !== -1) { usedIndices.add(idx); }
+    else if (VOWEL_LETTERS.includes(ch)) {
+      const vi = avail.findIndex((t, i) => t === '☆' && !usedIndices.has(i));
+      if (vi !== -1) { usedIndices.add(vi); }
+      else {
+        const ji = avail.findIndex((t, i) => t === '★' && !usedIndices.has(i));
+        if (ji !== -1) usedIndices.add(ji);
+      }
+    } else {
       const ji = avail.findIndex((t, i) => t === '★' && !usedIndices.has(i));
       if (ji !== -1) usedIndices.add(ji);
     }
@@ -969,15 +1012,19 @@ function nextRound() {
     return;
   }
 
-  // Draw tiles — player hand: max 2 of any letter (including jokers)
+  // Draw tiles — player hand: max 2 of any letter; jokers capped by round limits
   const pool = shuffle([...LETTER_POOL]);
   const debugParam = new URLSearchParams(location.search).get('tiles');
   const playerTiles = debugParam ? [...debugParam].slice(0, 8) : [];
   if (!debugParam) {
+    const lim = JOKER_LIMITS[state.round - 1] || { vowel: 0, regular: 0, total: 0 };
     const counts = {};
     for (let i = 0; i < pool.length && playerTiles.length < 8; i++) {
       const tile = pool[i];
-      if ((counts[tile] || 0) < 2) {
+      const isJoker = tile === '★' || tile === '☆';
+      const indivMax = tile === '☆' ? lim.vowel : tile === '★' ? lim.regular : 2;
+      const jokersSoFar = isJoker ? playerTiles.filter(t => t === '★' || t === '☆').length : 0;
+      if ((counts[tile] || 0) < indivMax && (!isJoker || jokersSoFar < lim.total)) {
         counts[tile] = (counts[tile] || 0) + 1;
         playerTiles.push(tile);
         pool.splice(i--, 1);
@@ -1079,8 +1126,10 @@ function renderBankDisplay() {
     word.tiles.forEach((tile, tileIdx) => {
       const btn = document.createElement('button');
       const isJoker = tile.letter === '★';
-      btn.className = `table-word-tile ${word.owner}${tile.taken ? ' taken' : ''}${isJoker ? ' joker' : ''}`;
-      btn.textContent = tile.letter;
+      const isVowelJoker = tile.letter === '☆';
+      btn.className = `table-word-tile ${word.owner}${tile.taken ? ' taken' : ''}${isJoker ? ' joker' : ''}${isVowelJoker ? ' vowel-joker' : ''}`;
+      if (isVowelJoker) { btn.innerHTML = '<span>אה</span><span>וי</span>'; }
+      else { btn.textContent = tile.letter; }
       btn.disabled = tile.taken || state.bankPickedThisRound;
       btn.onclick = () => pickBankTileFromTable(wordIdx, tileIdx);
       row.appendChild(btn);
@@ -1124,8 +1173,13 @@ function renderTiles() {
   state.playerTiles.forEach((letter, i) => {
     const btn = document.createElement('button');
     const isSelected = state.selectedIndices.includes(i);
-    btn.className = 'tile' + (letter === '★' ? ' joker' : '') + (isSelected ? ' selected used' : '');
-    btn.textContent = letter;
+    const tileType = letter === '★' ? ' joker' : letter === '☆' ? ' vowel-joker' : '';
+    btn.className = 'tile' + tileType + (isSelected ? ' selected used' : '');
+    if (letter === '☆') {
+      btn.innerHTML = '<span>אה</span><span>וי</span>';
+    } else {
+      btn.textContent = letter;
+    }
     btn.dataset.tileIndex = i;
     btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
     if (!isSelected) btn.onclick = () => selectTile(i);
@@ -1316,8 +1370,10 @@ function renderWordPreview() {
     } else {
       const letter = tileIdx?.fromBank ? tileIdx.letter : state.playerTiles[tileIdx];
       const btn = document.createElement('button');
-      btn.className = 'word-tile' + (tileIdx?.fromBank ? ' from-bank' : '');
-      btn.textContent = letter;
+      const isVowelJoker = letter === '☆';
+      btn.className = 'word-tile' + (tileIdx?.fromBank ? ' from-bank' : '') + (isVowelJoker ? ' vowel-joker' : '');
+      if (isVowelJoker) { btn.innerHTML = '<span>אה</span><span>וי</span>'; }
+      else { btn.textContent = letter; }
       btn.onclick = () => deselectTile(wordPos);
       container.appendChild(btn);
     }
@@ -1420,10 +1476,13 @@ function cancelJoker() {
   document.getElementById('btn-submit')?.focus();
 }
 
-function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPositions = []) {
+function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPositions = [], isVowelJoker = false) {
   return new Promise(resolve => {
     _jokerResolve = resolve;
     const modal = document.getElementById('joker-modal');
+
+    document.getElementById('joker-modal-title').textContent =
+      isVowelJoker ? 'קוביית תנועה — איזו אות?' : 'הג\'וקר מייצג איזו אות?';
 
     // Subtitle
     document.getElementById('joker-modal-subtitle').textContent =
@@ -1438,8 +1497,9 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
         d.className = 'joker-word-tile jwt-space';
         d.textContent = '·';
       } else if (idx === jokerWordPos) {
-        d.className = 'joker-word-tile jwt-joker';
-        d.textContent = '★';
+        d.className = 'joker-word-tile jwt-joker' + (isVowelJoker ? ' jwt-vowel' : '');
+        if (isVowelJoker) { d.innerHTML = '<span>אה</span><span>וי</span>'; }
+        else { d.textContent = '★'; }
       } else if (assignedPositions.includes(idx)) {
         d.className = 'joker-word-tile jwt-assigned';
         d.textContent = letter;
@@ -1453,10 +1513,11 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
     // Letter grid
     let onOutside = null;
     const grid = document.getElementById('letter-grid');
+    grid.className = 'letter-grid' + (isVowelJoker ? ' vowel-grid' : '');
     grid.innerHTML = '';
-    HE_LETTERS.forEach(letter => {
+    (isVowelJoker ? VOWEL_LETTERS : HE_LETTERS).forEach(letter => {
       const btn = document.createElement('button');
-      btn.className = 'letter-pick-btn';
+      btn.className = 'letter-pick-btn' + (isVowelJoker ? ' vowel-pick' : '');
       btn.textContent = letter;
       btn.onclick = () => {
         if (onOutside) { modal.removeEventListener('click', onOutside); onOutside = null; }
@@ -1486,14 +1547,15 @@ function askJokerLetter(tiles, jokerWordPos, totalJokers, jokerNum, assignedPosi
   });
 }
 
-// Resolves jokers in the tiles array, returns final letter array
+// Resolves jokers (★ and ☆) in the tiles array, returns final letter array
 async function resolveJokers(tiles) {
   const result = [...tiles];
-  const jokerPositions = result.map((t, i) => t === '★' ? i : -1).filter(i => i !== -1);
+  const jokerPositions = result.map((t, i) => (t === '★' || t === '☆') ? i : -1).filter(i => i !== -1);
   const assignedPositions = [];
   let jokerNum = 1;
   for (const pos of jokerPositions) {
-    const chosen = await askJokerLetter(result, pos, jokerPositions.length, jokerNum++, assignedPositions);
+    const isVowelJoker = result[pos] === '☆';
+    const chosen = await askJokerLetter(result, pos, jokerPositions.length, jokerNum++, assignedPositions, isVowelJoker);
     if (chosen === null) return null;
     result[pos] = chosen;
     assignedPositions.push(pos);
@@ -1525,7 +1587,7 @@ async function submitWord() {
   const rawTiles = state.selectedIndices.map(i => i === 'SPACE' ? ' ' : i?.fromBank ? i.letter : state.playerTiles[i]);
 
   // Resolve jokers first (if any)
-  const hasJokers = rawTiles.includes('★');
+  const hasJokers = rawTiles.includes('★') || rawTiles.includes('☆');
   const resolvedTiles = hasJokers ? await resolveJokers(rawTiles) : rawTiles;
   if (resolvedTiles === null) return; // cancelled
   // Apply finalForm to each sub-word part (handles 2-word terms like בית ספר)
@@ -1772,9 +1834,15 @@ function renderResultTiles(containerId, tiles, word, tileClass) {
   for (const ch of letters) {
     if (ch === ' ') continue; // spaces don't consume tiles
     const idx = avail.findIndex((t, i) => t === ch && !usedIndices.has(i));
-    if (idx !== -1) usedIndices.add(idx);
-    else {
-      // use a joker
+    if (idx !== -1) { usedIndices.add(idx); }
+    else if (VOWEL_LETTERS.includes(ch)) {
+      const vi = avail.findIndex((t, i) => t === '☆' && !usedIndices.has(i));
+      if (vi !== -1) { usedIndices.add(vi); }
+      else {
+        const ji = avail.findIndex((t, i) => t === '★' && !usedIndices.has(i));
+        if (ji !== -1) usedIndices.add(ji);
+      }
+    } else {
       const ji = avail.findIndex((t, i) => t === '★' && !usedIndices.has(i));
       if (ji !== -1) usedIndices.add(ji);
     }
@@ -1782,7 +1850,8 @@ function renderResultTiles(containerId, tiles, word, tileClass) {
   tiles.forEach((letter, i) => {
     const d = document.createElement('div');
     d.className = `rt ${tileClass} ${usedIndices.has(i) ? 'rt-used' : 'rt-unused'}`;
-    d.textContent = letter;
+    if (letter === '☆') { d.innerHTML = '<span>אה</span><span>וי</span>'; d.style.cssText = 'font-size:0.5rem;line-height:1.15;flex-direction:column'; }
+    else { d.textContent = letter; }
     container.appendChild(d);
   });
 }

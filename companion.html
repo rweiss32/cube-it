@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>שעון חול — קוביאות</title>
+  <meta name="theme-color" content="#2a2a50" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <style>
+    :root {
+      --bg:                 #f5f5fa;
+      --bg-card:            #ebebf5;
+      --bg-header:          #ffffff;
+      --border-header:      #d8d8e8;
+      --text:               #1a1a2e;
+      --text-muted:         #666;
+      --text-dim:           #999;
+      --btn-outline-border: #aaa;
+      --btn-outline-color:  #444;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:                 #0f0f1a;
+        --bg-card:            #1c1c2e;
+        --bg-header:          #0a0a14;
+        --border-header:      #1e1e30;
+        --text:               #eee;
+        --text-muted:         #888;
+        --text-dim:           #555;
+        --btn-outline-border: #555;
+        --btn-outline-color:  #ccc;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── HEADER ── */
+    #site-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border-header);
+      padding: 10px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #site-header a { text-decoration: none; display: flex; flex-direction: column; align-items: center; }
+    #header-logo-img { width: min(60%, 544px); height: auto; display: block; }
+    .header-subtitle { font-size: 0.85rem; color: var(--text-dim); letter-spacing: 1px; margin-top: 2px; }
+
+    /* ── MAIN ── */
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      width: 100%;
+      max-width: 480px;
+      padding: 120px 20px 48px;
+    }
+
+    /* ── DURATION PICKER ── */
+    #duration-picker { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+    .dur-btn {
+      font-family: inherit; font-size: 0.95rem;
+      padding: 8px 20px; border-radius: 50px;
+      border: 2px solid var(--btn-outline-border);
+      background: transparent; color: var(--btn-outline-color);
+      cursor: pointer; transition: border-color .15s, color .15s, background .15s;
+    }
+    .dur-btn:hover:not(:disabled) { border-color: #ffd200; color: #f7971e; }
+    .dur-btn.active {
+      background: linear-gradient(135deg, #f7971e, #ffd200);
+      color: #1a1a00; font-weight: 700; border-color: transparent;
+    }
+    .dur-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── HOURGLASS ── */
+    #hourglass-wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+    #hourglass-svg {
+      width: min(180px, 50vw); height: auto;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.18));
+    }
+
+    #hourglass-svg.finished { animation: hg-wiggle 0.45s ease-in-out 3; }
+    @keyframes hg-wiggle {
+      0%,100% { transform: rotate(0deg); }
+      25%      { transform: rotate(-9deg); }
+      75%      { transform: rotate(9deg); }
+    }
+
+    #countdown {
+      font-size: 3.6rem; font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px; color: #4ecca3;
+    }
+    #countdown.urgent  { color: #ff6b6b; animation: pulse .5s infinite alternate; }
+    #countdown.done    { color: #ff6b6b; animation: none; }
+    @keyframes pulse { from { opacity: 1; } to { opacity: .35; } }
+
+    /* ── CONTROLS ── */
+    #controls { display: flex; gap: 14px; justify-content: center; }
+
+    .btn {
+      border: none; border-radius: 50px; padding: 14px 36px;
+      font-size: 1.1rem; font-family: inherit;
+      cursor: pointer; transition: transform .15s, box-shadow .15s;
+    }
+    .btn:active { transform: scale(.96); }
+    .btn-gold { background: linear-gradient(135deg,#f7971e,#ffd200); color: #1a1a00; font-weight: 700; }
+    .btn-gold:hover:not(:disabled) { box-shadow: 0 4px 20px #ffd20066; transform: translateY(-2px); }
+    .btn-gold:disabled { background: linear-gradient(135deg,#a0a0a0,#c8c8c8); color: #555; cursor: not-allowed; opacity: 0.6; transform: none; box-shadow: none; }
+    .btn-outline { background: transparent; border: 2px solid var(--btn-outline-border); color: var(--btn-outline-color); }
+    .btn-outline:hover { border-color: #ffd200; color: #f7971e; }
+  </style>
+</head>
+<body>
+
+<header id="site-header">
+  <a href="index.html">
+    <img src="assets/logo.png" id="header-logo-img" alt="קוביאות" />
+    <span class="header-subtitle">שעון חול</span>
+  </a>
+</header>
+
+<main id="main">
+
+  <div id="duration-picker">
+    <button class="dur-btn" data-secs="60">60 שנ׳</button>
+    <button class="dur-btn" data-secs="90">90 שנ׳</button>
+    <button class="dur-btn" data-secs="120">120 שנ׳</button>
+    <button class="dur-btn" data-secs="180">180 שנ׳</button>
+  </div>
+
+  <div id="hourglass-wrap">
+    <svg id="hourglass-svg" viewBox="0 0 100 180" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <clipPath id="top-clip">
+          <polygon points="8,6 92,6 50,90"/>
+        </clipPath>
+        <clipPath id="bottom-clip">
+          <polygon points="8,174 92,174 50,90"/>
+        </clipPath>
+      </defs>
+
+      <!-- empty triangle tints -->
+      <polygon points="8,6 92,6 50,90"    fill="rgba(78,204,163,0.07)"/>
+      <polygon points="8,174 92,174 50,90" fill="rgba(78,204,163,0.07)"/>
+
+      <!-- top sand -->
+      <rect id="top-sand"    x="0" y="6"   width="100" height="84" clip-path="url(#top-clip)"    fill="#ffd200"/>
+      <!-- bottom sand -->
+      <rect id="bottom-sand" x="0" y="174" width="100" height="0"  clip-path="url(#bottom-clip)" fill="#ffd200"/>
+
+      <!-- sand stream (visible while running) -->
+      <rect id="sand-stream" x="47.5" y="86" width="5" height="8" rx="2.5" fill="#ffd200" opacity="0"/>
+
+      <!-- frame -->
+      <path d="M 8,6 L 92,6 L 50,90 L 92,174 L 8,174 L 50,90 Z"
+            fill="none" stroke="#4ecca3" stroke-width="3" stroke-linejoin="round"/>
+      <line x1="5"  y1="6"   x2="95" y2="6"   stroke="#4ecca3" stroke-width="5"  stroke-linecap="round"/>
+      <line x1="5"  y1="174" x2="95" y2="174" stroke="#4ecca3" stroke-width="5"  stroke-linecap="round"/>
+    </svg>
+
+    <div id="countdown">2:00</div>
+  </div>
+
+  <div id="controls">
+    <button id="btn-toggle" class="btn btn-gold"    onclick="toggleTimer()">התחל</button>
+    <button id="btn-reset"  class="btn btn-outline" onclick="resetTimer()">אפס</button>
+  </div>
+
+</main>
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const STORAGE_KEY    = 'companion_timer_duration';
+const DEFAULT_SECS   = 120;
+const URGENT_THRESH  = 10;   // seconds
+const TOP_FULL_H     = 84;   // px in SVG units — full height of each triangle
+const BOTTOM_FULL_Y  = 174;
+const TOP_BASE_Y     = 90;
+
+// ── State ──────────────────────────────────────────────────────────────────
+let totalSecs  = parseInt(localStorage.getItem(STORAGE_KEY) || DEFAULT_SECS, 10);
+let remaining  = totalSecs;
+let running    = false;
+let elapsed    = 0;       // ms accumulated before the current run started
+let startTime  = null;    // Date.now() when current run began
+let handle     = null;
+
+// ── DOM ────────────────────────────────────────────────────────────────────
+const topSand      = document.getElementById('top-sand');
+const bottomSand   = document.getElementById('bottom-sand');
+const sandStream   = document.getElementById('sand-stream');
+const countdownEl  = document.getElementById('countdown');
+const btnToggle    = document.getElementById('btn-toggle');
+const btnReset     = document.getElementById('btn-reset');
+const hourglassSvg = document.getElementById('hourglass-svg');
+
+// ── Duration picker ────────────────────────────────────────────────────────
+document.querySelectorAll('.dur-btn').forEach(btn => {
+  if (parseInt(btn.dataset.secs, 10) === totalSecs) btn.classList.add('active');
+  btn.addEventListener('click', () => {
+    if (running) return;
+    document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    totalSecs = parseInt(btn.dataset.secs, 10);
+    localStorage.setItem(STORAGE_KEY, totalSecs);
+    remaining = totalSecs;
+    elapsed   = 0;
+    render();
+  });
+});
+
+function setDurBtnsDisabled(disabled) {
+  document.querySelectorAll('.dur-btn').forEach(b => b.disabled = disabled);
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function render() {
+  const progress = totalSecs > 0 ? 1 - remaining / totalSecs : 1;
+
+  // Countdown
+  countdownEl.textContent = formatTime(remaining);
+  countdownEl.classList.toggle('urgent', remaining > 0 && remaining <= URGENT_THRESH);
+  countdownEl.classList.toggle('done',   remaining === 0);
+
+  // Top sand: full at progress=0, empty at progress=1
+  const topH = Math.max(0, TOP_FULL_H * (1 - progress));
+  topSand.setAttribute('height', topH);
+  topSand.setAttribute('y', TOP_BASE_Y - topH);
+
+  // Bottom sand: empty at progress=0, full at progress=1
+  const botH = Math.min(TOP_FULL_H, TOP_FULL_H * progress);
+  bottomSand.setAttribute('height', botH);
+  bottomSand.setAttribute('y', BOTTOM_FULL_Y - botH);
+
+  // Sand stream
+  sandStream.setAttribute('opacity', running && remaining > 0 ? '0.9' : '0');
+}
+
+// ── Tick ───────────────────────────────────────────────────────────────────
+function tick() {
+  const totalElapsed = elapsed + (Date.now() - startTime);
+  remaining = Math.max(0, totalSecs - Math.floor(totalElapsed / 1000));
+  render();
+  if (remaining === 0) onFinished();
+}
+
+// ── Controls ───────────────────────────────────────────────────────────────
+function toggleTimer() {
+  if (remaining === 0) return;
+
+  if (running) {
+    // Pause
+    elapsed += Date.now() - startTime;
+    startTime = null;
+    clearInterval(handle); handle = null;
+    running = false;
+    btnToggle.textContent = 'המשך';
+    setDurBtnsDisabled(false);
+    render();
+  } else {
+    // Start / Resume
+    startTime = Date.now();
+    running   = true;
+    handle    = setInterval(tick, 250);
+    btnToggle.textContent = 'השהה';
+    setDurBtnsDisabled(true);
+    render();
+  }
+}
+
+function resetTimer() {
+  if (handle) { clearInterval(handle); handle = null; }
+  running   = false;
+  startTime = null;
+  elapsed   = 0;
+  remaining = totalSecs;
+  hourglassSvg.classList.remove('finished');
+  btnToggle.textContent = 'התחל';
+  btnToggle.disabled    = false;
+  setDurBtnsDisabled(false);
+  render();
+}
+
+function onFinished() {
+  clearInterval(handle); handle = null;
+  running   = false;
+  startTime = null;
+  elapsed   = 0;
+  btnToggle.textContent = 'התחל';
+  btnToggle.disabled    = true;
+  hourglassSvg.classList.add('finished');
+  playBuzzer();
+}
+
+// ── Audio ──────────────────────────────────────────────────────────────────
+function playBuzzer() {
+  try {
+    const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+    const beep = (freq, start, dur) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime  + start + dur);
+    };
+    beep(880,  0,    0.22);
+    beep(880,  0.32, 0.22);
+    beep(1046, 0.64, 0.55);
+  } catch (_) { /* ignore if audio unavailable */ }
+}
+
+// ── Header height compensation ─────────────────────────────────────────────
+function syncPadding() {
+  const h = document.getElementById('site-header').getBoundingClientRect().height;
+  document.getElementById('main').style.paddingTop = (h + 20) + 'px';
+}
+window.addEventListener('load',   syncPadding);
+window.addEventListener('resize', syncPadding);
+
+// ── Init ───────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

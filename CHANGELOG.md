@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.30.0] 2026-04-23 — companion timer page for physical game players
+
+- New `companion.html` page with an animated SVG hourglass timer (configurable: 60 / 90 / 120 / 180 sec, default 120)
+- Audio buzzer via Web Audio API when time runs out; last-used duration persisted to localStorage
+- Start screen now has a link to the companion page (opens in new tab)
+
 ## [0.29.1] 2026-04-14 - Updated list of words
 
 ## [0.29.0] 2026-04-05 — letter bank — previous round words displayed on the table as clickable tiles, player picks one tile per round to use directly in their word

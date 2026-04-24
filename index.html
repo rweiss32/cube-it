@@ -2272,7 +2272,10 @@ async function takeFbScreenshot() {
         document.head.appendChild(s);
       });
     }
-    const canvas = await window.html2canvas(document.body, { scale: 0.55, useCORS: true, logging: false });
+    const canvas = await window.html2canvas(document.body, {
+      scale: 0.55, useCORS: true, logging: false,
+      ignoreElements: el => el.tagName === 'CANVAS',
+    });
     _fbScreenshot    = canvas.toDataURL('image/jpeg', 0.7);
     thumbEl.src      = _fbScreenshot;
     thumbEl.style.display = 'block';

@@ -598,6 +598,69 @@
       .checking-msg { min-height: 24px; font-size: 0.88rem; }
     }
 
+    /* ── FEEDBACK ── */
+    #btn-feedback {
+      position: absolute; bottom: 4px; right: 50px;
+      background: none; border: none; cursor: pointer;
+      font-size: 1.7rem; color: var(--text-dim); padding: 4px;
+      line-height: 1; min-width: 44px; min-height: 44px;
+    }
+    #btn-feedback:hover { color: var(--text); }
+
+    #feedback-overlay {
+      display: none; position: fixed; inset: 0; z-index: 400;
+      background: rgba(0,0,0,0.55);
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    #feedback-overlay.open { display: flex; }
+
+    #feedback-modal {
+      background: var(--bg-card); border-radius: 20px;
+      padding: 24px; width: 100%; max-width: 400px;
+      max-height: 90vh; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 14px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    }
+    .fb-title { font-size: 1.1rem; font-weight: 700; }
+    .fb-type-row { display: flex; gap: 8px; }
+    .fb-type-btn {
+      flex: 1; padding: 8px 4px; border-radius: 10px;
+      border: 2px solid var(--border-header);
+      background: transparent; color: var(--btn-outline-color);
+      cursor: pointer; font-size: 0.82rem; font-family: inherit;
+      transition: border-color .15s, background .15s;
+    }
+    .fb-type-btn.active {
+      border-color: #4ecca3; background: rgba(78,204,163,0.12);
+      color: var(--text); font-weight: 600;
+    }
+    .fb-label { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; }
+    .fb-input, .fb-textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      border: 1.5px solid var(--border-header);
+      background: var(--bg); color: var(--text);
+      font-family: inherit; font-size: 0.95rem; outline: none;
+      transition: border-color .15s;
+    }
+    .fb-input:focus, .fb-textarea:focus { border-color: #4ecca3; }
+    .fb-textarea { min-height: 90px; resize: vertical; }
+    .fb-screenshot-row { display: flex; align-items: center; gap: 10px; }
+    #btn-take-screenshot {
+      padding: 7px 14px; border-radius: 8px;
+      border: 1.5px solid var(--border-header);
+      background: transparent; color: var(--btn-outline-color);
+      cursor: pointer; font-size: 0.85rem; font-family: inherit;
+      white-space: nowrap; transition: border-color .15s;
+    }
+    #btn-take-screenshot:hover { border-color: #4ecca3; }
+    #fb-screenshot-thumb {
+      max-height: 48px; border-radius: 6px; display: none;
+      border: 1px solid var(--border-header);
+    }
+    .fb-actions { display: flex; gap: 10px; }
+    .fb-actions .btn { flex: 1; padding: 13px; }
+    #fb-msg { text-align: center; font-size: 0.9rem; min-height: 1.2em; }
+
   </style>
 </head>
 <body>
@@ -609,8 +672,45 @@
     <div class="header-subtitle">משחק מילים</div>
   </div>
   <div class="header-version" id="header-version"></div>
-  <button id="btn-settings" onclick="openSettings()" aria-label="הגדרות">⚙️</button>
+  <button id="btn-settings"  onclick="openSettings()"  aria-label="הגדרות">⚙️</button>
+  <button id="btn-feedback"  onclick="openFeedback()"  aria-label="משוב">💬</button>
 </header>
+
+<!-- ══════════════ FEEDBACK MODAL ══════════════ -->
+<div id="feedback-overlay" onclick="onFeedbackOverlayClick(event)">
+  <div id="feedback-modal" dir="rtl">
+    <div class="fb-title">שלח משוב</div>
+
+    <div class="fb-type-row">
+      <button class="fb-type-btn active" data-type="bug"      onclick="selectFbType(this)">🐛 באג</button>
+      <button class="fb-type-btn"        data-type="feature"  onclick="selectFbType(this)">💡 תכונה</button>
+      <button class="fb-type-btn"        data-type="feedback" onclick="selectFbType(this)">💬 משוב</button>
+    </div>
+
+    <div>
+      <div class="fb-label">נושא *</div>
+      <input id="fb-subject" class="fb-input" type="text" placeholder="תאר בקצרה..." />
+    </div>
+
+    <div>
+      <div class="fb-label">פירוט *</div>
+      <textarea id="fb-description" class="fb-textarea" placeholder="תאר בפירוט..."></textarea>
+    </div>
+
+    <div class="fb-screenshot-row">
+      <button id="btn-take-screenshot" onclick="takeFbScreenshot()">📸 צלם מסך</button>
+      <img id="fb-screenshot-thumb" alt="תצוגה מקדימה" />
+      <span id="fb-screenshot-status" style="font-size:0.8rem;color:var(--text-muted)"></span>
+    </div>
+
+    <div class="fb-actions">
+      <button id="fb-submit-btn" class="btn btn-gold"    onclick="submitFeedback()">שלח</button>
+      <button                    class="btn btn-outline" onclick="closeFeedback()">ביטול</button>
+    </div>
+
+    <div id="fb-msg"></div>
+  </div>
+</div>
 
 <!-- ══════════════ START ══════════════ -->
 <div id="screen-start" class="screen active">
@@ -2105,6 +2205,123 @@ function closeWikiSheet() {
   document.getElementById('wiki-sheet').classList.remove('open');
   document.removeEventListener('click', closeWikiSheet);
   document.removeEventListener('keydown', onWikiKey);
+}
+
+// ══════════════════════════════════════════════
+//  FEEDBACK
+// ══════════════════════════════════════════════
+
+const FEEDBACK_URL = 'https://cube-it-server.vercel.app/api/feedback';
+let _fbType       = 'bug';
+let _fbScreenshot = null;
+
+function openFeedback() {
+  _fbScreenshot = null;
+  document.getElementById('fb-subject').value      = '';
+  document.getElementById('fb-description').value  = '';
+  document.getElementById('fb-msg').textContent    = '';
+  document.getElementById('fb-screenshot-thumb').style.display  = 'none';
+  document.getElementById('fb-screenshot-status').textContent   = '';
+  document.getElementById('fb-submit-btn').disabled = false;
+  document.getElementById('fb-submit-btn').textContent = 'שלח';
+  document.getElementById('feedback-overlay').classList.add('open');
+}
+
+function closeFeedback() {
+  document.getElementById('feedback-overlay').classList.remove('open');
+}
+
+function onFeedbackOverlayClick(e) {
+  if (e.target.id === 'feedback-overlay') closeFeedback();
+}
+
+function selectFbType(btn) {
+  document.querySelectorAll('.fb-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _fbType = btn.dataset.type;
+}
+
+function captureFbGameState() {
+  if (!state || state.phase === 'start') return null;
+  const catLabel = CATEGORIES[state.currentCatKey]?.category || state.currentCatKey || '—';
+  const word = (state.selectedIndices || [])
+    .map(i => i === 'SPACE' ? ' ' : i?.fromBank ? i.letter : state.playerTiles[i])
+    .join('');
+  return {
+    'גרסה':         VERSION,
+    'שלב':          state.phase,
+    'סיבוב':        `${state.round}/5`,
+    'ניקוד שחקן':  state.playerScore,
+    'ניקוד מחשב':  state.cpuScore,
+    'קטגוריה':      catLabel,
+    'אותיות שחקן':  (state.playerTiles || []).join(' '),
+    'מילה נוכחית':  word || '—',
+  };
+}
+
+async function takeFbScreenshot() {
+  const statusEl = document.getElementById('fb-screenshot-status');
+  const thumbEl  = document.getElementById('fb-screenshot-thumb');
+  statusEl.textContent = 'טוען...';
+  try {
+    if (!window.html2canvas) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
+        s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    const canvas = await window.html2canvas(document.body, { scale: 0.55, useCORS: true, logging: false });
+    _fbScreenshot    = canvas.toDataURL('image/jpeg', 0.7);
+    thumbEl.src      = _fbScreenshot;
+    thumbEl.style.display = 'block';
+    statusEl.textContent  = '✓';
+  } catch (e) {
+    statusEl.textContent = 'שגיאה בצילום';
+    console.error('Screenshot error:', e);
+  }
+}
+
+async function submitFeedback() {
+  const subject     = document.getElementById('fb-subject').value.trim();
+  const description = document.getElementById('fb-description').value.trim();
+  const msgEl       = document.getElementById('fb-msg');
+  const submitBtn   = document.getElementById('fb-submit-btn');
+
+  if (!subject || !description) {
+    msgEl.style.color = '#ff6b6b';
+    msgEl.textContent = '⚠️ יש למלא נושא ותיאור';
+    return;
+  }
+
+  submitBtn.disabled    = true;
+  submitBtn.textContent = 'שולח...';
+  msgEl.textContent     = '';
+
+  try {
+    const res = await fetch(FEEDBACK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type:        _fbType,
+        subject,
+        description,
+        gameState:   captureFbGameState(),
+        screenshot:  _fbScreenshot,
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    msgEl.style.color = '#4ecca3';
+    msgEl.textContent = '✅ תודה! המשוב נשלח בהצלחה';
+    setTimeout(closeFeedback, 1800);
+  } catch (e) {
+    msgEl.style.color = '#ff6b6b';
+    msgEl.textContent = '❌ שגיאה בשליחה, נסה שוב';
+    submitBtn.disabled    = false;
+    submitBtn.textContent = 'שלח';
+    console.error('Feedback submit error:', e);
+  }
 }
 
 // ── INIT ──────────────────────────────────────

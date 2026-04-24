@@ -2274,7 +2274,7 @@ async function takeFbScreenshot() {
     }
     const canvas = await window.html2canvas(document.body, {
       scale: 0.55, useCORS: true, logging: false,
-      ignoreElements: el => el.tagName === 'CANVAS',
+      ignoreElements: el => el.tagName === 'CANVAS' || el.tagName === 'IMG',
     });
     _fbScreenshot    = canvas.toDataURL('image/jpeg', 0.7);
     thumbEl.src      = _fbScreenshot;

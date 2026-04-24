@@ -2242,14 +2242,14 @@ function selectFbType(btn) {
 }
 
 function captureFbGameState() {
-  if (!state || state.phase === 'start') return null;
+  const base = { 'גרסה': VERSION, 'שלב': state?.phase || 'start' };
+  if (!state || state.phase === 'start') return base;
   const catLabel = CATEGORIES[state.currentCatKey]?.category || state.currentCatKey || '—';
   const word = (state.selectedIndices || [])
     .map(i => i === 'SPACE' ? ' ' : i?.fromBank ? i.letter : state.playerTiles[i])
     .join('');
   return {
-    'גרסה':         VERSION,
-    'שלב':          state.phase,
+    ...base,
     'סיבוב':        `${state.round}/5`,
     'ניקוד שחקן':  state.playerScore,
     'ניקוד מחשב':  state.cpuScore,

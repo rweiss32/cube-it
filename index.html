@@ -688,6 +688,11 @@
     </div>
 
     <div>
+      <div class="fb-label">שם</div>
+      <input id="fb-name" class="fb-input" type="text" placeholder="השם שלך (אופציונלי)" />
+    </div>
+
+    <div>
       <div class="fb-label">נושא *</div>
       <input id="fb-subject" class="fb-input" type="text" placeholder="תאר בקצרה..." />
     </div>
@@ -2217,6 +2222,7 @@ let _fbScreenshot = null;
 
 function openFeedback() {
   _fbScreenshot = null;
+  document.getElementById('fb-name').value         = localStorage.getItem('fb_name') || '';
   document.getElementById('fb-subject').value      = '';
   document.getElementById('fb-description').value  = '';
   document.getElementById('fb-msg').textContent    = '';
@@ -2308,6 +2314,7 @@ async function takeFbScreenshot() {
 }
 
 async function submitFeedback() {
+  const name        = document.getElementById('fb-name').value.trim();
   const subject     = document.getElementById('fb-subject').value.trim();
   const description = document.getElementById('fb-description').value.trim();
   const msgEl       = document.getElementById('fb-msg');
@@ -2319,6 +2326,8 @@ async function submitFeedback() {
     return;
   }
 
+  if (name) localStorage.setItem('fb_name', name);
+
   submitBtn.disabled    = true;
   submitBtn.textContent = 'שולח...';
   msgEl.textContent     = '';
@@ -2329,6 +2338,7 @@ async function submitFeedback() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type:        _fbType,
+        name:        name || null,
         subject,
         description,
         gameState:   captureFbGameState(),

@@ -2242,20 +2242,37 @@ function selectFbType(btn) {
 }
 
 function captureFbGameState() {
-  const base = { 'גרסה': VERSION, 'שלב': state?.phase || 'start' };
+  const ua = navigator.userAgent;
+  const browser =
+    /Edg\//.test(ua)     ? 'Edge' :
+    /Chrome\//.test(ua)  ? 'Chrome' :
+    /Firefox\//.test(ua) ? 'Firefox' :
+    /Safari\//.test(ua)  ? 'Safari' : 'Other';
+
+  const base = {
+    'גרסה':       VERSION,
+    'שלב':        state?.phase || 'start',
+    'דפדפן':      browser,
+    'User Agent': ua,
+    'מסך':        `${screen.width}×${screen.height} (pixel ratio: ${window.devicePixelRatio})`,
+    'Viewport':   `${window.innerWidth}×${window.innerHeight}`,
+    'שפה':        navigator.language,
+  };
+
   if (!state || state.phase === 'start') return base;
-  const catLabel = CATEGORIES[state.currentCatKey]?.category || state.currentCatKey || '—';
+
+  const catLabel = CATEGORIES[state.currentCatKey]?.category || state.currentCatKey || null;
   const word = (state.selectedIndices || [])
     .map(i => i === 'SPACE' ? ' ' : i?.fromBank ? i.letter : state.playerTiles[i])
     .join('');
   const full = {
     ...base,
-    'סיבוב':        state.round ? `${state.round}/5` : null,
-    'ניקוד שחקן':  state.playerScore,
-    'ניקוד מחשב':  state.cpuScore,
-    'קטגוריה':      catLabel !== '—' ? catLabel : null,
-    'אותיות שחקן':  (state.playerTiles || []).join(' ') || null,
-    'מילה נוכחית':  word || null,
+    'סיבוב':       state.round ? `${state.round}/5` : null,
+    'ניקוד שחקן': state.playerScore,
+    'ניקוד מחשב': state.cpuScore,
+    'קטגוריה':     catLabel,
+    'אותיות שחקן': (state.playerTiles || []).join(' ') || null,
+    'מילה נוכחית': word || null,
   };
   return Object.fromEntries(Object.entries(full).filter(([, v]) => v !== null && v !== ''));
 }

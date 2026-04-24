@@ -2248,15 +2248,16 @@ function captureFbGameState() {
   const word = (state.selectedIndices || [])
     .map(i => i === 'SPACE' ? ' ' : i?.fromBank ? i.letter : state.playerTiles[i])
     .join('');
-  return {
+  const full = {
     ...base,
-    'סיבוב':        `${state.round}/5`,
+    'סיבוב':        state.round ? `${state.round}/5` : null,
     'ניקוד שחקן':  state.playerScore,
     'ניקוד מחשב':  state.cpuScore,
-    'קטגוריה':      catLabel,
-    'אותיות שחקן':  (state.playerTiles || []).join(' '),
-    'מילה נוכחית':  word || '—',
+    'קטגוריה':      catLabel !== '—' ? catLabel : null,
+    'אותיות שחקן':  (state.playerTiles || []).join(' ') || null,
+    'מילה נוכחית':  word || null,
   };
+  return Object.fromEntries(Object.entries(full).filter(([, v]) => v !== null && v !== ''));
 }
 
 async function takeFbScreenshot() {

@@ -2272,15 +2272,19 @@ async function takeFbScreenshot() {
         document.head.appendChild(s);
       });
     }
+    const overlay = document.getElementById('feedback-overlay');
+    overlay.style.display = 'none';
     const canvas = await window.html2canvas(document.body, {
       scale: 0.55, useCORS: true, logging: false,
       ignoreElements: el => el.tagName === 'CANVAS' || el.tagName === 'IMG',
     });
+    overlay.style.display = '';
     _fbScreenshot    = canvas.toDataURL('image/jpeg', 0.7);
     thumbEl.src      = _fbScreenshot;
     thumbEl.style.display = 'block';
     statusEl.textContent  = '✓';
   } catch (e) {
+    document.getElementById('feedback-overlay').style.display = '';
     statusEl.textContent = 'שגיאה בצילום';
     console.error('Screenshot error:', e);
   }

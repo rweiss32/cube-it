@@ -5,6 +5,10 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.38.0] 2026-04-25 — paused timer blinks during AI word validation
+
+- Timer text blinks (slow pulse) while the AI validates a submitted word, signalling the wait
+
 ## [0.37.1] 2026-04-25 — web review fixes — phase state, a11y, dead code, touch targets
 
 - Fixed `state.phase` never updating, so feedback form now captures round/score/tiles during play

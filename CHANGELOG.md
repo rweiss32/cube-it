@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.37.1] 2026-04-25 — web review fixes — phase state, a11y, dead code, touch targets
+
+- Fixed `state.phase` never updating, so feedback form now captures round/score/tiles during play
+- Accessibility: added `aria-live` to error and AI-checking regions, focus trap in feedback modal, ARIA role and close button on wiki sheet, `aria-label` on word-preview tiles, `aria-hidden` on confetti canvas
+- Removed dead Wiktionary code, fixed timer bar height overflow, increased wiki button touch target to 44px
+
 ## [0.37.0] 2026-04-25 — pause timer during AI word validation
 
 - Round timer pauses while the AI validates a submitted word

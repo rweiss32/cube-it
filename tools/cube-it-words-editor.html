@@ -8,7 +8,7 @@
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       background: #f0f0f5; color: #1a1a2e;
-      height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+      height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
     }
 
     /* ── Header ── */
@@ -19,6 +19,9 @@
     }
     header h1 { font-size: 1rem; flex: 1; }
     #status { font-size: 0.8rem; color: #aaa; }
+    #current-file { font-size: 0.85rem; color: #ccc; font-style: italic; }
+    #stats { font-size: 0.8rem; color: #aaa; }
+    .version-text { font-size: 0.9em; color: #888; font-family: sans-serif; margin-right: 8px; }
     .btn {
       padding: 7px 14px; border: none; border-radius: 6px;
       cursor: pointer; font-size: 0.88rem; font-family: inherit; font-weight: 600;
@@ -48,7 +51,7 @@
 
     /* ── Categories panel ── */
     .panel-cats {
-      width: 230px; background: #e8e8f4;
+      width: 230px; min-width: 160px; background: #e8e8f4;
       border-left: 1px solid #ccc;
       display: flex; flex-direction: column; flex-shrink: 0;
     }
@@ -80,6 +83,10 @@
     .cat-item.active .edit-cat-btn { color: rgba(255,255,255,0.7); opacity: 0; }
     .cat-item.active:hover .edit-cat-btn { opacity: 1; }
     .cat-item.active:hover .edit-cat-btn:hover { color: #4ecca3; background: rgba(255,255,255,0.15); }
+    @media (hover: none) {
+      .cat-item .edit-cat-btn,
+      .cat-item .del-cat-btn { opacity: 0.45; }
+    }
     .cat-item .cat-name-input {
       flex: 1; background: white; border: 1px solid #4ecca3;
       border-radius: 4px; padding: 2px 6px; font-size: 0.95rem;
@@ -132,6 +139,14 @@
     #summary-list li { font-size: 0.95rem; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
     #summary-list li .sum-num { font-weight: 700; font-size: 1.1rem; min-width: 2.5ch; text-align: left; }
 
+    .panel-search { padding: 8px 10px; border-bottom: 1px solid #ccc; background: #ddddf0; }
+    #cat-search {
+      width: 100%; padding: 6px 10px; border: 1px solid #aaa;
+      border-radius: 6px; font-size: 0.88rem; font-family: inherit;
+      direction: rtl; outline: none; background: white; color: #1a1a2e;
+    }
+    #cat-search:focus { border-color: #4ecca3; }
+
     .add-cat-area { padding: 10px; border-top: 1px solid #ccc; display: flex; flex-direction: column; gap: 6px; }
     #add-cat-input {
       display: none; padding: 7px 10px; border: 1px solid #aaa;
@@ -174,7 +189,7 @@
     .word-chip .remove-btn {
       background: none; border: none; cursor: pointer;
       font-size: 0.75rem; color: #a0703a; line-height: 1;
-      padding: 0; opacity: 0.5;
+      padding: 4px 6px; opacity: 0.5;
     }
     .word-chip .remove-btn:hover { opacity: 1; color: #e94560; }
     .word-chip.new .remove-btn { color: #0a5a3a; }
@@ -194,6 +209,9 @@
     #word-input:focus { border-color: #4ecca3; }
     #word-input.error { border-color: #e94560; }
     #word-error { margin-top: 5px; font-size: 0.85rem; color: #e94560; min-height: 1.1em; }
+    #btn-add-cat { width: 100%; }
+    .cat-item:focus-visible { outline: 2px solid #4ecca3; outline-offset: -2px; }
+    .word-label:focus-visible { outline: 2px solid #4ecca3; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -204,8 +222,8 @@
   
   <button class="btn btn-primary" onclick="openFile()">📂 פתח קובץ</button>
   <button class="btn btn-secondary" id="btn-merge" onclick="mergeFile()" disabled>⇄ מיזוג</button>
-  <span id="current-file" style="font-size:0.85rem;color:#ccc;font-style:italic;"></span>
-  <span id="stats" style="font-size:0.8rem;color:#aaa;"></span>
+  <span id="current-file"></span>
+  <span id="stats"></span>
   <span id="status"></span>
 </header>
 
@@ -227,7 +245,7 @@
       <span class="empty-msg">בחר קטגוריה מהרשימה</span>
     </div>
     <div class="word-input-area" id="word-input-area" style="display:none">
-      <input type="text" id="word-input" placeholder="הקלד מילה (לדוגמה: בית ספר) או כמה מילים מופרדות בפסיק (בית,כלב,בית ספר) ולחץ Enter..." autocomplete="off" spellcheck="false" />
+      <input type="text" id="word-input" aria-label="הוספת מילה" placeholder="הקלד מילה (לדוגמה: בית ספר) או כמה מילים מופרדות בפסיק (בית,כלב,בית ספר) ולחץ Enter..." autocomplete="off" spellcheck="false" />
       <div id="word-error"></div>
     </div>
   </div>
@@ -235,17 +253,20 @@
   <!-- Categories panel -->
   <div class="panel-cats">
     <div class="panel-label">קטגוריות</div>
+    <div class="panel-search">
+      <input type="text" id="cat-search" placeholder="חיפוש..." aria-label="חיפוש קטגוריה" autocomplete="off" spellcheck="false" />
+    </div>
     <div class="cat-list" id="cat-list"></div>
     <div class="add-cat-area">
-      <input type="text" id="add-cat-input" placeholder="שם קטגוריה חדשה..." spellcheck="false" />
-      <button class="btn btn-secondary" id="btn-add-cat" onclick="toggleAddCat()" style="width:100%">+ קטגוריה חדשה</button>
+      <input type="text" id="add-cat-input" placeholder="שם קטגוריה חדשה..." aria-label="שם קטגוריה חדשה" spellcheck="false" />
+      <button class="btn btn-secondary" id="btn-add-cat" onclick="toggleAddCat()">+ קטגוריה חדשה</button>
     </div>
   </div>
 </div>
 
 <!-- Summary dialog -->
 <div id="summary-overlay">
-  <div id="summary-box">
+  <div id="summary-box" role="dialog" aria-modal="true" aria-labelledby="summary-title">
     <p id="summary-title"></p>
     <ul id="summary-list"></ul>
     <div class="confirm-btns">
@@ -256,7 +277,7 @@
 
 <!-- Confirm dialog -->
 <div id="confirm-overlay">
-  <div id="confirm-box">
+  <div id="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirm-msg">
     <p id="confirm-msg"></p>
     <div class="confirm-btns">
       <button class="btn btn-danger" id="confirm-ok">מחק</button>
@@ -266,10 +287,13 @@
 </div>
 
 <script>
-const APP_VERSION = "1.1";
 'use strict';
+const APP_VERSION = "1.2";
 
 // ── Hebrew utils ──────────────────────────────────────────────────────────
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 const FINAL_MAP  = {'\u05DD':'\u05DE','\u05DF':'\u05E0','\u05E3':'\u05E4','\u05DA':'\u05DB','\u05E5':'\u05E6'};
 const SUFFIX_MAP = {'\u05DE':'\u05DD','\u05E0':'\u05DF','\u05E4':'\u05E3','\u05DB':'\u05DA','\u05E6':'\u05E5'};
 const HEBREW_RE  = /^[\u05D0-\u05EA]+( [\u05D0-\u05EA]+)?$/;  // allows one internal space for 2-word terms
@@ -386,9 +410,14 @@ function renderCatList() {
   renderStats();
   const list = document.getElementById('cat-list');
   list.innerHTML = '';
-  categories.forEach(cat => {
+  const searchTerm = (document.getElementById('cat-search')?.value || '').trim();
+  let displayed = [...categories].sort((a, b) => a.name.localeCompare(b.name, 'he'));
+  if (searchTerm) displayed = displayed.filter(c => c.name.includes(searchTerm));
+  displayed.forEach(cat => {
     const div = document.createElement('div');
     div.className = 'cat-item' + (cat === selectedCat ? ' active' : '');
+    div.setAttribute('role', 'button');
+    div.setAttribute('tabindex', '0');
 
     const nameSpan = document.createElement('span');
     nameSpan.textContent = cat.name;
@@ -421,6 +450,9 @@ function renderCatList() {
     div.appendChild(editBtn);
     div.appendChild(delBtn);
     div.onclick = () => selectCategory(cat);
+    div.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCategory(cat); }
+    });
     list.appendChild(div);
   });
 }
@@ -447,7 +479,12 @@ function renderWords(highlightLast = false) {
     label.className = 'word-label';
     label.textContent = word;
     label.title = 'לחץ לעריכה';
+    label.setAttribute('role', 'button');
+    label.setAttribute('tabindex', '0');
     label.addEventListener('click', () => startEditWord(chip, word, cat));
+    label.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startEditWord(chip, word, cat); }
+    });
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-btn';
@@ -476,11 +513,14 @@ function confirmDialog(msg) {
     overlay.classList.add('visible');
     const ok     = document.getElementById('confirm-ok');
     const cancel = document.getElementById('confirm-cancel');
+    const prev = document.activeElement;
+    ok.focus();
     function close(result) {
       overlay.classList.remove('visible');
       ok.removeEventListener('click', onOk);
       cancel.removeEventListener('click', onCancel);
       overlay.removeEventListener('click', onOverlay);
+      prev?.focus();
       resolve(result);
     }
     function onOk()      { close(true); }
@@ -495,7 +535,7 @@ function confirmDialog(msg) {
 async function deleteCategory(cat) {
   const wordCount = cat.words.length;
   const detail = wordCount > 0 ? ` (${wordCount} מילים)` : '';
-  const confirmed = await confirmDialog(`למחוק את הקטגוריה <strong>${cat.name}</strong>${detail}?`);
+  const confirmed = await confirmDialog(`למחוק את הקטגוריה <strong>${escapeHtml(cat.name)}</strong>${detail}?`);
   if (!confirmed) return;
   categories = categories.filter(c => c !== cat);
   if (selectedCat === cat) {
@@ -543,11 +583,12 @@ function startEditWord(chip, oldWord, cat) {
     document.getElementById('word-input').focus();
   }
 
+  let committed = false;
   input.addEventListener('keydown', async e => {
-    if (e.key === 'Enter')  { e.preventDefault(); await commit(); }
-    if (e.key === 'Escape') { renderWords(); }
+    if (e.key === 'Enter')  { e.preventDefault(); committed = true; await commit(); }
+    if (e.key === 'Escape') { committed = true; renderWords(); }
   });
-  input.addEventListener('blur', () => renderWords());
+  input.addEventListener('blur', () => { if (!committed) renderWords(); });
 }
 
 // ── Inline edit: category name ────────────────────────────────────────────
@@ -580,11 +621,12 @@ function startEditCatName(div, nameSpan, badge, editBtn, delBtn, cat) {
     renderCatList();
   }
 
+  let committed = false;
   input.addEventListener('keydown', async e => {
-    if (e.key === 'Enter')  { e.preventDefault(); await commit(); }
-    if (e.key === 'Escape') { renderCatList(); }
+    if (e.key === 'Enter')  { e.preventDefault(); committed = true; await commit(); }
+    if (e.key === 'Escape') { committed = true; renderCatList(); }
   });
-  input.addEventListener('blur', () => renderCatList());
+  input.addEventListener('blur', () => { if (!committed) renderCatList(); });
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────
@@ -609,6 +651,8 @@ function toggleAddCat() {
     btn.textContent = '+ קטגוריה חדשה';
   }
 }
+
+document.getElementById('cat-search').addEventListener('input', () => renderCatList());
 
 document.getElementById('add-cat-input').addEventListener('keydown', async e => {
   if (e.key === 'Escape') { toggleAddCat(); return; }
@@ -777,14 +821,18 @@ function showSummaryDialog(fileName, newCategories, newWords, ignoredWords) {
     list.appendChild(li);
   }
   const overlay = document.getElementById('summary-overlay');
+  const summaryOk = document.getElementById('summary-ok');
   overlay.classList.add('visible');
+  const prev = document.activeElement;
+  summaryOk.focus();
   function close() {
     overlay.classList.remove('visible');
-    document.getElementById('summary-ok').removeEventListener('click', close);
+    summaryOk.removeEventListener('click', close);
     overlay.removeEventListener('click', onOverlay);
+    prev?.focus();
   }
   function onOverlay(e) { if (e.target === overlay) close(); }
-  document.getElementById('summary-ok').addEventListener('click', close);
+  summaryOk.addEventListener('click', close);
   overlay.addEventListener('click', onOverlay);
 }
 
@@ -794,22 +842,8 @@ if (!window.showOpenFilePicker) {
   document.querySelector('header .btn').disabled = true;
 }
 
-// This function runs once the page loads to update the UI
-    window.addEventListener('DOMContentLoaded', () => {
-      const versionElement = document.getElementById('version-display');
-      if (versionElement) {
-        versionElement.textContent = `v${APP_VERSION}`;
-      }
-    });
+document.getElementById('version-display').textContent = `v${APP_VERSION}`;
 </script>
-<style>
-    .version-text {
-      font-size: 0.9em;
-      color: #888;
-      font-family: sans-serif;
-      margin-right: 8px;
-    }
-  </style>
 </body>
 </html>
 ```

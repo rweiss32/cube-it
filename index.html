@@ -193,6 +193,7 @@
     .timer-wrap { text-align: center; }
     .timer { font-size: 1.6rem; font-weight: 700; color: #4ecca3; font-variant-numeric: tabular-nums; }
     .timer.urgent { color: #ff6b6b; animation: pulse .5s infinite alternate; }
+    .timer.paused { color: var(--text-muted); }
     @keyframes pulse { from { opacity: 1; } to { opacity: .4; } }
     .thinking-dots span { animation: dotblink 1.2s infinite both; font-size: 1.6rem; line-height: 1; color: var(--text-muted); }
     .thinking-dots span:nth-child(2) { animation-delay: .3s; }
@@ -1033,6 +1034,7 @@ function initState() {
     currentCatKey: null,
     timerSecs: 120,
     timerHandle: null,
+    timerPaused: false,
     usedCatIndices: [],
     cpuName: pickCpuName(null),
     tableWords: [],       // [{ tiles:[{letter,taken}], owner:'player'|'cpu' }]
@@ -1202,6 +1204,20 @@ function nextRound() {
 function startTimer() {
   state.timerSecs = 120;
   updateTimerUI();
+  resumeTimer();
+}
+
+function pauseTimer() {
+  clearInterval(state.timerHandle);
+  state.timerHandle = null;
+  state.timerPaused = true;
+  updateTimerUI();
+}
+
+function resumeTimer() {
+  if (state.timerHandle) return;
+  state.timerPaused = false;
+  updateTimerUI();
   state.timerHandle = setInterval(() => {
     state.timerSecs--;
     updateTimerUI();
@@ -1217,10 +1233,11 @@ const elTimerBar = document.getElementById('g-timer-bar');
 
 function updateTimerUI() {
   const s = state.timerSecs;
+  const paused = state.timerPaused;
   elTimer.textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-  elTimer.className = 'timer' + (s <= 15 ? ' urgent' : '');
+  elTimer.className = 'timer' + (paused ? ' paused' : s <= 15 ? ' urgent' : '');
   elTimerBar.style.width = (s / 120 * 100) + '%';
-  elTimerBar.style.background = s <= 15 ? '#ff6b6b' : '#4ecca3';
+  elTimerBar.style.background = paused ? 'var(--text-muted)' : (s <= 15 ? '#ff6b6b' : '#4ecca3');
 }
 
 // ══════════════════════════════════════════════
@@ -1790,6 +1807,7 @@ async function submitWord() {
 
   // Not in list — ask AI
   setSubmitLocked(true);
+  pauseTimer();
   document.getElementById('g-checking').innerHTML = '🤖 בודק עם AI<span class="checking-dots"><span>.</span><span>.</span><span>.</span></span>';
 
   const catLabel = CATEGORIES[state.currentCatKey]?.category || state.currentCatKey;
@@ -1800,6 +1818,7 @@ async function submitWord() {
   setSubmitLocked(false);
 
   if (aiResult === false) {
+    resumeTimer();
     document.getElementById('g-error').textContent = `"${word}" לא מתאימה לקטגוריה. נסה מילה אחרת!`;
     return;
   }

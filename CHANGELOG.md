@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.37.0] 2026-04-25 — pause timer during AI word validation
+
+- Round timer pauses while the AI validates a submitted word
+- Timer text and progress bar turn gray to signal the paused state
+- Timer resumes automatically if the word is rejected, allowing another attempt
+
 ## [0.36.1] 2026-04-25 — words editor: search, alphabetical sort, and web review fixes
 
 - Category search filter and alphabetical sorting in the words editor sidebar

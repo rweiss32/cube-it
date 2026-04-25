@@ -199,7 +199,7 @@
     .thinking-dots span:nth-child(2) { animation-delay: .3s; }
     .thinking-dots span:nth-child(3) { animation-delay: .6s; }
     @keyframes dotblink { 0%,80%,100% { opacity: .15; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-4px); } }
-    .timer-bar-bg { width: 100%; height: 4px; background: var(--timer-bar-track); border-radius: 3px; margin: 3px auto 0; }
+    .timer-bar-bg { width: 100%; height: 6px; background: var(--timer-bar-track); border-radius: 3px; margin: 3px auto 0; overflow: hidden; }
     .timer-bar { height: 6px; border-radius: 3px; background: #4ecca3;
                  transition: width 1s linear, background 1s; width: 100%; }
 
@@ -540,7 +540,7 @@
     .side-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
     .side-word-container { display: flex; align-items: center; justify-content: center; gap: 6px; }
     .side-word { font-size: 2rem; font-weight: 700; min-height: 44px; }
-    .wiki-icon-btn { background: none; border: 1.5px solid var(--text-muted); border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px 0 0 0; flex-shrink: 0; font-family: serif; }
+    .wiki-icon-btn { background: none; border: 1.5px solid var(--text-muted); border-radius: 50%; min-width: 44px; min-height: 44px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: serif; }
     .wiki-icon-btn:hover { color: var(--text); border-color: var(--text); }
     .side-count { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
     .side-tiles { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
@@ -583,6 +583,8 @@
     /* ── WIKI SHEET HEADER ── */
     .wiki-sheet-header { position: relative; text-align: center; margin-bottom: 6px; }
     .wiki-source-label { position: absolute; right: 0; font-size: 0.75rem; color: var(--text-muted); }
+    #wiki-close-btn { position: absolute; left: 0; background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--text-muted); padding: 0; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+    #wiki-close-btn:hover { color: var(--text); }
 
     /* ── COMPACT LAYOUT for short viewports (phones with browser chrome) ── */
     @media (max-height: 800px) {
@@ -779,8 +781,8 @@
     <button class="btn-space" id="btn-space" onclick="insertSpace()" disabled aria-label="רווח">רווח</button>
   </div>
   <div class="action-area">
-    <div class="error-msg" id="g-error"></div>
-    <div class="checking-msg" id="g-checking"></div>
+    <div class="error-msg" id="g-error" aria-live="polite"></div>
+    <div class="checking-msg" id="g-checking" aria-live="assertive"></div>
     <div class="action-row">
       <button class="btn-clear" id="btn-clear" onclick="clearWord()">נקה <span aria-hidden="true">✕</span></button>
       <button class="btn-submit" id="btn-submit" onclick="submitWord()">שלח מילה <span aria-hidden="true">✓</span></button>
@@ -826,9 +828,9 @@
     </div>
   </div>
 
-  <div id="r-suggestions" class="info-box"></div>
+  <div id="r-suggestions" class="info-box" aria-live="polite"></div>
 
-  <div id="r-warning" class="info-box info-box-warning"></div>
+  <div id="r-warning" class="info-box info-box-warning" aria-live="polite"></div>
 
 <button class="btn btn-gold" id="r-next-btn" onclick="soundClick();nextRound()">סיבוב הבא <span aria-hidden="true">▶</span></button>
 </div>
@@ -890,13 +892,14 @@
 </div>
 
 <!-- ══════════════ CONFETTI CANVAS ══════════════ -->
-<canvas id="confetti-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999;display:none"></canvas>
+<canvas id="confetti-canvas" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999;display:none"></canvas>
 
 <!-- ══════════════ WIKI BOTTOM SHEET ══════════════ -->
-<div id="wiki-sheet">
+<div id="wiki-sheet" role="dialog" aria-modal="true" aria-labelledby="wiki-sheet-word">
   <div class="wiki-sheet-header">
     <span class="wiki-source-label">ויקיפדיה</span>
     <span id="wiki-sheet-word"></span>
+    <button id="wiki-close-btn" onclick="closeWikiSheet()" aria-label="סגור">✕</button>
   </div>
   <div id="wiki-sheet-extract"></div>
 </div>
@@ -1002,6 +1005,7 @@ function loadCategories() {
   CARD_KEYS = arr.map(c => c.category);
 }
 const MAX_ROUNDS = 5;
+const MAX_TILE_DUPLICATES = 2;
 const CPU_THINK_BASE_MS       = 1500;
 const CPU_THINK_PER_LETTER_MS = 250;
 const CPU_THINK_MAX_LETTERS   = 7;
@@ -1133,7 +1137,7 @@ function drawHand(pool, round) {
   for (let i = 0; i < pool.length && hand.length < 8; i++) {
     const tile = pool[i];
     const isJoker = tile === '★' || tile === '☆';
-    const indivMax = tile === '☆' ? lim.vowel : tile === '★' ? lim.regular : 2;
+    const indivMax = tile === '☆' ? lim.vowel : tile === '★' ? lim.regular : MAX_TILE_DUPLICATES;
     const jokersSoFar = isJoker ? hand.filter(t => t === '★' || t === '☆').length : 0;
     if ((counts[tile] || 0) < indivMax && (!isJoker || jokersSoFar < lim.total)) {
       counts[tile] = (counts[tile] || 0) + 1;
@@ -1173,9 +1177,8 @@ function nextRound() {
   const pick = available[Math.floor(Math.random() * available.length)];
   state.usedCatIndices.push(pick);
 
-  const debug_category = 'יישוב או עיר בארץ עם יותר מ 1000 תושבים';
-  state.currentCatKey =
-  debugParam ? debug_category : CARD_KEYS[pick]; // DEBUG case
+  const debugCategory = 'יישוב או עיר בארץ עם יותר מ 1000 תושבים';
+  state.currentCatKey = debugParam ? debugCategory : CARD_KEYS[pick];
 
   updateCpuNameLabels();
 
@@ -1193,6 +1196,7 @@ function nextRound() {
   renderCpuTiles();
   renderWordPreview();
   renderBankDisplay();
+  state.phase = 'playing';
   showScreen('screen-game');
   startTimer();
 }
@@ -1511,7 +1515,7 @@ function renderWordPreview() {
       const btn = document.createElement('button');
       btn.className = 'word-tile-space';
       btn.textContent = '␣';
-      btn.title = 'לחץ להסרת הרווח';
+      btn.setAttribute('aria-label', 'רווח — לחץ להסרה');
       btn.onclick = () => deselectTile(wordPos);
       container.appendChild(btn);
     } else {
@@ -1519,8 +1523,8 @@ function renderWordPreview() {
       const btn = document.createElement('button');
       const isVowelJoker = letter === '☆';
       btn.className = 'word-tile' + (tileIdx?.fromBank ? ' from-bank' : '') + (isVowelJoker ? ' vowel-joker' : '');
-      if (isVowelJoker) { btn.innerHTML = '<span>א</span><span>ה</span><span>ו</span><span>י</span>'; }
-      else { btn.textContent = letter; }
+      if (isVowelJoker) { btn.innerHTML = '<span>א</span><span>ה</span><span>ו</span><span>י</span>'; btn.setAttribute('aria-label', 'תנועה — לחץ להסרה'); }
+      else { btn.textContent = letter; btn.setAttribute('aria-label', `${letter} — לחץ להסרה`); }
       btn.onclick = () => deselectTile(wordPos);
       container.appendChild(btn);
     }
@@ -1581,8 +1585,6 @@ function updateSpaceBtn() {
 //  WIKTIONARY VALIDATION
 // ══════════════════════════════════════════════
 
-const wordCache = new Map(); // cache: normalizedWord → true/false/null(network error)
-
 // ── AI CATEGORY VALIDATION ──────────────────────
 const AI_URL = 'https://cube-it-server.vercel.app/api/check';
 const AI_CACHE_LS_KEY = 'cube-it-ai-cache';
@@ -1623,25 +1625,6 @@ async function validateWordWithAI(word, category) {
     return result;
   } catch (e) {
     console.error(`[AI] ERROR:`, e);
-    return null;
-  }
-}
-
-async function isHebrewWord(word) {
-  const key = norm(word);               // cache key without final forms
-  const lookup = finalForm(key);        // Wiktionary lookup with correct final form
-  if (wordCache.has(key)) return wordCache.get(key);
-
-  try {
-    const url = `https://he.wiktionary.org/w/api.php?action=query&titles=${encodeURIComponent(lookup)}&format=json&origin=*`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const pages = data.query.pages;
-    const valid = !Object.prototype.hasOwnProperty.call(pages, '-1');
-    wordCache.set(key, valid);
-    return valid;
-  } catch {
-    wordCache.set(key, null); // null = network error
     return null;
   }
 }
@@ -2216,6 +2199,7 @@ function showWikiSheet(word, extract) {
   document.getElementById('wiki-sheet-extract').textContent = extract;
   document.getElementById('wiki-sheet').classList.add('open');
   setTimeout(() => {
+    document.getElementById('wiki-close-btn').focus();
     document.addEventListener('click', closeWikiSheet, { once: true });
     document.addEventListener('keydown', onWikiKey);
   }, 0);
@@ -2239,6 +2223,11 @@ const FEEDBACK_URL = 'https://cube-it-server.vercel.app/api/feedback';
 let _fbType       = 'bug';
 let _fbScreenshot = null;
 
+function onFeedbackKey(e) {
+  if (e.key === 'Escape') closeFeedback();
+  else if (e.key === 'Tab') trapFocus(document.getElementById('feedback-modal'), e);
+}
+
 function openFeedback() {
   _fbScreenshot = null;
   document.getElementById('fb-name').value         = localStorage.getItem('fb_name') || '';
@@ -2250,10 +2239,15 @@ function openFeedback() {
   document.getElementById('fb-submit-btn').disabled = false;
   document.getElementById('fb-submit-btn').textContent = 'שלח';
   document.getElementById('feedback-overlay').classList.add('open');
+  setTimeout(() => {
+    document.getElementById('fb-name').focus();
+    document.addEventListener('keydown', onFeedbackKey);
+  }, 0);
 }
 
 function closeFeedback() {
   document.getElementById('feedback-overlay').classList.remove('open');
+  document.removeEventListener('keydown', onFeedbackKey);
 }
 
 function onFeedbackOverlayClick(e) {

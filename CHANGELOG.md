@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.36.1] 2026-04-25 — words editor: search, alphabetical sort, and web review fixes
+
+- Category search filter and alphabetical sorting in the words editor sidebar
+- Accessibility fixes: keyboard navigation, dialog focus traps, ARIA roles and labels
+- Bug fixes: `'use strict'` placement, XSS escape in confirm dialog, double-render on Enter+blur
+
 ## [0.36.0] 2026-04-24 — in-app feedback form with screenshot and device info
 
 - 💬 button in header opens a modal to send bug reports, feature requests, or general feedback

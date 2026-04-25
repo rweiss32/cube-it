@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.38.1] 2026-04-25 — manifest: maskable icon purpose and matching splash background color
+
+- PWA icons now declare `"purpose": "any maskable"` for correct adaptive icon shape on Android
+- Splash screen `background_color` changed from white to `#2a2a50` to match the app theme color
+- Corrected sw.js fetch handler comment to list current external APIs
+
 ## [0.38.0] 2026-04-25 — paused timer blinks during AI word validation
 
 - Timer text blinks (slow pulse) while the AI validates a submitted word, signalling the wait

@@ -1,6 +1,6 @@
 // Service Worker — קוביאות
 // Update CACHE version whenever a new app version is deployed.
-const CACHE = 'cubeit-v0.38.0';
+const CACHE = 'cubeit-v0.38.1';
 
 const STATIC = [
   '/',
@@ -27,7 +27,7 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch: cache-first for same-origin, network-only for external (Wiktionary, Wikipedia)
+// Fetch: cache-first for same-origin, network-only for external (Wikipedia, AI, feedback APIs)
 self.addEventListener('fetch', e => {
   if (!e.request.url.startsWith(self.location.origin)) return;
   e.respondWith(

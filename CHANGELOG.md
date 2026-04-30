@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.38.2] 2026-04-30 — block tile interactions while waiting for AI validation
+
+- Tile clicks, deselections, bank tile picks, and space insertion are now ignored while the AI is validating a word
+- Added `aiValidating` flag and `setAiValidating()` to gate all tile-mutating functions during the AI request
+- Space button is also visually disabled during AI validation
+
 ## [0.38.1] 2026-04-25 — manifest: maskable icon purpose and matching splash background color
 
 - PWA icons now declare `"purpose": "any maskable"` for correct adaptive icon shape on Android

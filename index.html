@@ -1206,6 +1206,8 @@ function nextRound() {
 // ══════════════════════════════════════════════
 
 function startTimer() {
+  clearInterval(state.timerHandle);
+  state.timerHandle = null;
   state.timerSecs = 120;
   updateTimerUI();
   resumeTimer();

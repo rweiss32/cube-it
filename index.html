@@ -905,7 +905,7 @@
 </div>
 
 <script>
-const VERSION = '0.38.3';
+const VERSION = '0.38.4';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1613,12 +1613,18 @@ async function validateWordWithAI(word, category) {
   const requestBody = { word, category };
   console.log(`[AI] REQUEST →`, AI_URL, requestBody);
 
+  // Abort after 15s — Vercel cold starts can take 5–10s; on timeout the word is accepted with a warning.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
   try {
     const res = await fetch(AI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
     console.log(`[AI] HTTP status: ${res.status} ${res.statusText}`);
     const data = await res.json();
     console.log(`[AI] RESPONSE ←`, data);
@@ -1630,6 +1636,7 @@ async function validateWordWithAI(word, category) {
     }
     return result;
   } catch (e) {
+    clearTimeout(timeoutId);
     console.error(`[AI] ERROR:`, e);
     return null;
   }

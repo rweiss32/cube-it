@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.38.4] 2026-04-30 — add 15s timeout to AI validation request
+
+- AI word validation now aborts after 15 seconds if the server doesn't respond
+- On timeout the fetch throws an AbortError, caught as a network error — word is accepted with a "could not verify" warning
+
 ## [0.38.3] 2026-04-30 — timer not starting when round begins after direct word submission
 
 - Fixed `startTimer` to always clear and null the stale interval handle before calling `resumeTimer`

@@ -1294,6 +1294,7 @@ function renderBankDisplay() {
 // ══════════════════════════════════════════════
 
 function pickBankTileFromTable(wordIdx, tileIdx) {
+  if (aiValidating) return;
   if (state.bankPickedThisRound) return;
   const tile = state.tableWords[wordIdx]?.tiles[tileIdx];
   if (!tile || tile.taken) return;
@@ -1533,6 +1534,7 @@ function renderWordPreview() {
 }
 
 function selectTile(i) {
+  if (aiValidating) return;
   soundClick();
   state.selectedIndices.push(i);
   document.getElementById('g-error').textContent = '';
@@ -1541,6 +1543,7 @@ function selectTile(i) {
 }
 
 function deselectTile(wordPos) {
+  if (aiValidating) return;
   const entry = state.selectedIndices.splice(wordPos, 1)[0];
   if (entry?.fromBank) {
     state.tableWords[entry.wordIdx].tiles[entry.tileIdx].taken = false;
@@ -1565,6 +1568,7 @@ function clearWord() {
 }
 
 function insertSpace() {
+  if (aiValidating) return;
   const sel = state.selectedIndices;
   if (sel.length === 0 || sel[sel.length - 1] === 'SPACE' || sel.includes('SPACE')) return;
   soundClick();
@@ -1742,9 +1746,15 @@ async function resolveJokers(tiles) {
 //  SUBMIT
 // ══════════════════════════════════════════════
 
-function setSubmitLocked(locked) {
+// True while waiting for the AI validation response — blocks tile interactions during that time.
+let aiValidating = false;
+
+function setAiValidating(locked) {
+  aiValidating = locked;
   document.getElementById('btn-submit').disabled = locked;
   document.getElementById('btn-clear').disabled = locked;
+  if (locked) document.getElementById('btn-space').disabled = true;
+  else updateSpaceBtn();
 }
 
 async function submitWord() {
@@ -1789,7 +1799,7 @@ async function submitWord() {
   }
 
   // Not in list — ask AI
-  setSubmitLocked(true);
+  setAiValidating(true);
   pauseTimer();
   document.getElementById('g-checking').innerHTML = '🤖 בודק עם AI<span class="checking-dots"><span>.</span><span>.</span><span>.</span></span>';
 
@@ -1798,7 +1808,7 @@ async function submitWord() {
   console.log(`[submitWord] AI result: ${aiResult}`);
 
   document.getElementById('g-checking').textContent = '';
-  setSubmitLocked(false);
+  setAiValidating(false);
 
   if (aiResult === false) {
     resumeTimer();

@@ -5,6 +5,11 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.38.3] 2026-04-30 — timer not starting when round begins after direct word submission
+
+- Fixed `startTimer` to always clear and null the stale interval handle before calling `resumeTimer`
+- Previously, `clearInterval` without nulling left a truthy handle that caused `resumeTimer` to bail early
+
 ## [0.38.2] 2026-04-30 — block tile interactions while waiting for AI validation
 
 - Tile clicks, deselections, bank tile picks, and space insertion are now ignored while the AI is validating a word

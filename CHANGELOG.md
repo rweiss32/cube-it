@@ -5,6 +5,10 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.38.6] 2026-05-02 — increase AI validation timeout from 15s to 20s
+
+- AI word validation now waits up to 20 seconds before timing out (up from 15s)
+
 ## [0.38.5] 2026-05-01 — make CPU pick shorter words more often
 
 - CPU now picks uniformly at random from all valid words instead of favoring the longest one

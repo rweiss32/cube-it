@@ -905,7 +905,7 @@
 </div>
 
 <script>
-const VERSION = '0.38.5';
+const VERSION = '0.38.6';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1607,9 +1607,9 @@ async function validateWordWithAI(word, category) {
   const requestBody = { word, category };
   console.log(`[AI] REQUEST →`, AI_URL, requestBody);
 
-  // Abort after 15s — Vercel cold starts can take 5–10s; on timeout the word is accepted with a warning.
+  // Abort after 20s — Vercel cold starts can take 5–10s; on timeout the word is accepted with a warning.
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
 
   try {
     const res = await fetch(AI_URL, {

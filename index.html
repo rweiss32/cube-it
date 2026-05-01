@@ -905,7 +905,7 @@
 </div>
 
 <script>
-const VERSION = '0.38.4';
+const VERSION = '0.38.5';
 document.getElementById('header-version').textContent = 'v' + VERSION;
 
 // ══════════════════════════════════════════════
@@ -1115,16 +1115,10 @@ function getUsedTileLetters(tiles, word) {
 }
 
 function cpuBestWord(tiles, catKey) {
-  const letterCount = w => [...norm(w)].filter(c => c !== ' ').length;
   const words = shuffle(CATEGORIES[catKey]?.words || []);
-  const candidates = words.filter(w => canSpell(w, tiles)).sort((a, b) => letterCount(b) - letterCount(a));
+  const candidates = words.filter(w => canSpell(w, tiles));
   if (candidates.length === 0) return '';
-  // 25% chance: pick a random word from the top half instead of the best
-  if (candidates.length > 1 && Math.random() < 0.25) {
-    const topHalf = candidates.slice(0, Math.ceil(candidates.length / 2));
-    return topHalf[Math.floor(Math.random() * topHalf.length)];
-  }
-  return candidates[0];
+  return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 // ══════════════════════════════════════════════

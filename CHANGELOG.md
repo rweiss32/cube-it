@@ -5,6 +5,12 @@ All notable changes to **קוביאות (Kubiyot)** will be documented here.
 Format: `[version] YYYY-MM-DD — description`
 
 ---
+## [0.39.0] 2026-05-05 — improve rules box: accurate wording, joker tile icons, letter bank bullet
+
+- Rewrote all five rule bullets with accurate game mechanics (category selection, round wins)
+- Added inline joker tile icons (★ regular, 2×2 vowel grid) matching the actual game tiles
+- Added letter bank bullet explaining tile carry-over from round 2 onward
+
 ## [0.38.6] 2026-05-02 — increase AI validation timeout from 15s to 20s
 
 - AI word validation now waits up to 20 seconds before timing out (up from 15s)

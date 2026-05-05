@@ -2,7 +2,7 @@
 
 A browser-based Hebrew word game. Players build the longest word they can from 8 random letter tiles that fits the round's category, competing against a CPU opponent over 5 rounds.
 
-Play it at: [cube-it.co.il](https://www.cube-it.co.il/)
+Play it at: [rweiss32.github.io/cube-it/](https://rweiss32.github.io/cube-it/)
 
 ---
 

@@ -159,6 +159,11 @@
     .rules-box { background: var(--bg-card); border-radius: 12px; padding: 20px 24px;
                  text-align: right; line-height: 1.9; color: var(--text-muted); width: 100%; font-size: 0.95rem; }
     .rules-box strong { color: #f7971e; }
+    .rules-tile { display: inline-grid; width: 26px; height: 26px; border-radius: 5px; vertical-align: middle; margin: 0 2px; font-weight: bold; box-shadow: 0 2px 0 rgba(0,0,0,.25); }
+    .rules-tile.joker-icon { background: linear-gradient(135deg,#f7971e,#ffd200); color: #2a1a00; place-items: center; font-size: 0.85rem; }
+    .rules-tile.vowel-joker-icon { background: linear-gradient(135deg,#4ecca3,#2196f3); grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; position: relative; }
+    .rules-tile.vowel-joker-icon::after { content: ''; position: absolute; top: 12%; bottom: 12%; left: calc(50% - 0.5px); width: 1px; background: rgba(0,10,30,0.25); }
+    .rules-tile.vowel-joker-icon span { color: #0a1a2e; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; line-height: 1; }
 
     /* ── BUTTONS ── */
     .btn { border: none; border-radius: 50px; padding: 14px 36px; font-size: 1.1rem;
@@ -724,11 +729,11 @@
 <div id="screen-start" class="screen active">
   <div class="rules-box">
     <strong>איך משחקים?</strong><br>
-    • שולפים קלף הגדרה (למשל: <strong>חי</strong> או <strong>דומם</strong>)<br>
-    • כל שחקן מקבל 8 קוביות אותיות אקראיות<br>
-    • יש 2 דקות לבנות מילה ארוכה ככל האפשר שמתאימה להגדרה<br>
-    • המילה הארוכה ביותר זוכה בקלף<br>
-    • <strong>5 סיבובים</strong> — מי שאסף יותר קלפים מנצח!
+    • בכל סיבוב נבחרת <strong>הגדרה</strong> (למשל: <strong>חי</strong> או <strong>דומם</strong>)<br>
+    • כל שחקן מקבל 8 קוביות של אותיות ו/או <strong>ג'וקר</strong> <span class="rules-tile joker-icon">★</span> (כל אות) / <strong>ג'וקר תנועה</strong> <span class="rules-tile vowel-joker-icon" aria-hidden="true"><span>א</span><span>ה</span><span>ו</span><span>י</span></span><br>
+    • מסיבוב 2 ואילך: אפשר לבחור קובייה אחת מסיבוב קודם<br>
+    • יש 2 דקות לבנות את המילה הארוכה ביותר שמתאימה להגדרה<br>
+    • <strong>5 סיבובים</strong> — מי שניצח יותר סיבובים מנצח!
   </div>
   <button class="btn btn-gold" onclick="startGame()">התחל משחק <span aria-hidden="true">▶</span></button>
   <a href="companion.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="text-decoration:none">שעון חול למשחק הפיזי ⌛</a>
